@@ -27,11 +27,11 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
           <div className="flex items-center gap-4">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="icon">
+                <Button variant="outline" size="icon" className="md:hidden">
                   <Menu className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuContent align="end" className="w-48 bg-background">
                 <DropdownMenuItem asChild>
                   <Link to="/" className="w-full">
                     Dashboard
@@ -42,11 +42,21 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                     Charger Configuration
                   </Link>
                 </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/ocpp-monitor" className="w-full">
+                    OCPP Monitor
+                  </Link>
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-            <Link to="/charger-config">
-              <Button variant="outline">Charger Configuration</Button>
-            </Link>
+            <div className="hidden md:flex items-center gap-4">
+              <Link to="/charger-config">
+                <Button variant="outline">Charger Configuration</Button>
+              </Link>
+              <Link to="/ocpp-monitor">
+                <Button variant="outline">OCPP Monitor</Button>
+              </Link>
+            </div>
             <img src="/nobina-logo.svg" alt="Nobina Logo" className="h-12" />
           </div>
         </div>
