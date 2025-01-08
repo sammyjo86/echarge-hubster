@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/lib/supabaseClient";
 
 interface ChargerBootNotificationProps {
   chargerId: string;
@@ -15,28 +16,21 @@ export const ChargerBootNotification = ({
 
   const handleBootNotification = async () => {
     try {
-      const response = await fetch(
-        "https://lhwtwicfvzouosutiaap.supabase.co/functions/v1/ocpp",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
+      const { data, error } = await supabase.functions.invoke("ocpp", {
+        body: JSON.stringify([
+          2, // MessageTypeId for request
+          chargerId,
+          "BootNotification",
+          {
+            chargePointVendor: "Test Vendor",
+            chargePointModel: "Test Model",
+            firmwareVersion: "1.0.0",
           },
-          body: JSON.stringify([
-            2, // MessageTypeId for request
-            chargerId,
-            "BootNotification",
-            {
-              chargePointVendor: "Test Vendor",
-              chargePointModel: "Test Model",
-              firmwareVersion: "1.0.0",
-            },
-          ]),
-        }
-      );
+        ]),
+      });
 
-      if (!response.ok) {
-        throw new Error("Failed to send boot notification");
+      if (error) {
+        throw error;
       }
 
       toast({
@@ -44,6 +38,7 @@ export const ChargerBootNotification = ({
         description: "The boot notification was sent successfully",
       });
     } catch (error) {
+      console.error("Boot notification error:", error);
       toast({
         title: "Error",
         description: "Failed to send boot notification",
