@@ -14,7 +14,7 @@ import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { Eye, EyeOff, Radio } from "lucide-react";
 import { AddChargerDialog } from "@/components/charger-config/AddChargerDialog";
-import { ChargerBootNotification } from "@/components/charger-config/ChargerBootNotification";
+import ChargerBootNotification from "@/components/charger-config/ChargerBootNotification";
 import { Link } from "react-router-dom";
 
 interface Charger {
