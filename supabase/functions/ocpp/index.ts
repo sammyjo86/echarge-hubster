@@ -23,6 +23,24 @@ serve(async (req) => {
 
     const [messageTypeId, uniqueId, action, payload] = body
 
+    // Broadcast the OCPP message to all subscribers
+    const { error: broadcastError } = await supabase
+      .channel('ocpp-messages')
+      .send({
+        type: 'broadcast',
+        event: 'ocpp_message',
+        payload: {
+          messageType: messageTypeId === 2 ? 'REQUEST' : 'RESPONSE',
+          messageId: uniqueId,
+          action,
+          payload,
+        },
+      })
+
+    if (broadcastError) {
+      console.error('Error broadcasting message:', broadcastError)
+    }
+
     if (messageTypeId === 2) { // Client-initiated request
       switch (action) {
         case "BootNotification": {

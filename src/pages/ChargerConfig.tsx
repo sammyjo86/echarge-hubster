@@ -12,9 +12,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Radio } from "lucide-react";
 import { AddChargerDialog } from "@/components/charger-config/AddChargerDialog";
 import { ChargerBootNotification } from "@/components/charger-config/ChargerBootNotification";
+import { Link } from "react-router-dom";
 
 interface Charger {
   id: string;
@@ -109,7 +110,15 @@ const ChargerConfig = () => {
     <div className="container mx-auto py-8 space-y-8">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">Charger Configuration</h1>
-        <AddChargerDialog onChargerAdded={fetchChargers} />
+        <div className="flex items-center gap-4">
+          <Link to="/ocpp-monitor">
+            <Button variant="outline" className="flex items-center gap-2">
+              <Radio className="h-4 w-4" />
+              OCPP Monitor
+            </Button>
+          </Link>
+          <AddChargerDialog onChargerAdded={fetchChargers} />
+        </div>
       </div>
 
       <div className="grid gap-6">
