@@ -9,7 +9,92 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      charging_stations: {
+        Row: {
+          charge_point_id: string
+          created_at: string | null
+          firmware_version: string | null
+          id: string
+          last_heartbeat: string | null
+          location: string | null
+          name: string
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          charge_point_id: string
+          created_at?: string | null
+          firmware_version?: string | null
+          id?: string
+          last_heartbeat?: string | null
+          location?: string | null
+          name: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          charge_point_id?: string
+          created_at?: string | null
+          firmware_version?: string | null
+          id?: string
+          last_heartbeat?: string | null
+          location?: string | null
+          name?: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      charging_transactions: {
+        Row: {
+          created_at: string | null
+          end_time: string | null
+          energy_delivered: number | null
+          id: string
+          meter_start: number | null
+          meter_stop: number | null
+          start_time: string | null
+          station_id: string | null
+          status: string | null
+          transaction_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          end_time?: string | null
+          energy_delivered?: number | null
+          id?: string
+          meter_start?: number | null
+          meter_stop?: number | null
+          start_time?: string | null
+          station_id?: string | null
+          status?: string | null
+          transaction_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          end_time?: string | null
+          energy_delivered?: number | null
+          id?: string
+          meter_start?: number | null
+          meter_stop?: number | null
+          start_time?: string | null
+          station_id?: string | null
+          status?: string | null
+          transaction_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "charging_transactions_station_id_fkey"
+            columns: ["station_id"]
+            isOneToOne: false
+            referencedRelation: "charging_stations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
