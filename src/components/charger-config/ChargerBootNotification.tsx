@@ -1,68 +1,99 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/lib/supabaseClient";
+import { useToast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ChargerBootNotificationProps {
   chargerId: string;
-  lastBootPayload: string | null;
 }
 
-export const ChargerBootNotification = ({
-  chargerId,
-  lastBootPayload,
-}: ChargerBootNotificationProps) => {
+const ChargerBootNotification = ({ chargerId }: ChargerBootNotificationProps) => {
   const { toast } = useToast();
+  const [isConnecting, setIsConnecting] = useState(false);
+  const [socket, setSocket] = useState<WebSocket | null>(null);
 
-  const handleBootNotification = async () => {
-    try {
-      const { data, error } = await supabase.functions.invoke("ocpp-relay", {
-        body: {
-          messageType: "REQUEST",
-          chargePointId: chargerId,
-          action: "BootNotification",
-          payload: {
-            chargePointVendor: "Test Vendor",
-            chargePointModel: "Test Model",
-            firmwareVersion: "1.0.0",
-          },
+  const connectWebSocket = () => {
+    setIsConnecting(true);
+    
+    // Create WebSocket connection
+    const wsUrl = `wss://lhwtwicfvzouosutiaap.functions.supabase.co/ocpp-server?chargePointId=${chargerId}`;
+    const ws = new WebSocket(wsUrl);
+
+    ws.onopen = () => {
+      console.log('WebSocket connected');
+      setSocket(ws);
+      setIsConnecting(false);
+      toast({
+        title: "Connected",
+        description: `Charger ${chargerId} connected successfully`,
+      });
+
+      // Send BootNotification
+      const bootNotification = [
+        2, // Request
+        chargerId,
+        "BootNotification",
+        {
+          chargePointVendor: "Test Vendor",
+          chargePointModel: "Test Model",
+          firmwareVersion: "1.0.0",
         },
-      });
+      ];
+      ws.send(JSON.stringify(bootNotification));
+    };
 
-      if (error) {
-        throw error;
-      }
-
+    ws.onclose = () => {
+      console.log('WebSocket disconnected');
+      setSocket(null);
       toast({
-        title: "Boot Notification Sent",
-        description: "The boot notification was sent successfully",
-      });
-    } catch (error) {
-      console.error("Boot notification error:", error);
-      toast({
-        title: "Error",
-        description: "Failed to send boot notification",
+        title: "Disconnected",
+        description: `Charger ${chargerId} disconnected`,
         variant: "destructive",
       });
+    };
+
+    ws.onerror = (error) => {
+      console.error('WebSocket error:', error);
+      setIsConnecting(false);
+      toast({
+        title: "Connection Error",
+        description: "Failed to connect to OCPP server",
+        variant: "destructive",
+      });
+    };
+
+    ws.onmessage = (event) => {
+      const message = JSON.parse(event.data);
+      console.log('Received message:', message);
+    };
+  };
+
+  const disconnectWebSocket = () => {
+    if (socket) {
+      socket.close();
+      setSocket(null);
     }
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Boot Notification</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div>
-          <h4 className="text-sm font-medium mb-2">Last Boot Payload</h4>
-          <pre className="bg-muted p-2 rounded-md text-xs overflow-auto">
-            {lastBootPayload ? JSON.stringify(JSON.parse(lastBootPayload), null, 2) : "No boot notification received"}
-          </pre>
-        </div>
-        <Button onClick={handleBootNotification}>
-          Send Boot Notification
+    <div className="space-y-4">
+      {!socket ? (
+        <Button 
+          onClick={connectWebSocket} 
+          disabled={isConnecting}
+        >
+          {isConnecting ? "Connecting..." : "Connect & Send Boot Notification"}
         </Button>
-      </CardContent>
-    </Card>
+      ) : (
+        <Button 
+          onClick={disconnectWebSocket}
+          variant="destructive"
+        >
+          Disconnect
+        </Button>
+      )}
+    </div>
   );
 };
+
+export default ChargerBootNotification;
