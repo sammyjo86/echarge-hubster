@@ -5,9 +5,10 @@ import { supabase } from "@/integrations/supabase/client";
 
 interface ChargerBootNotificationProps {
   chargerId: string;
+  lastBootPayload: string | null;
 }
 
-const ChargerBootNotification = ({ chargerId }: ChargerBootNotificationProps) => {
+const ChargerBootNotification = ({ chargerId, lastBootPayload }: ChargerBootNotificationProps) => {
   const { toast } = useToast();
   const [isConnecting, setIsConnecting] = useState(false);
   const [socket, setSocket] = useState<WebSocket | null>(null);
