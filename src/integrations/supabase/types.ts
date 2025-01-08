@@ -9,6 +9,39 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      chargers: {
+        Row: {
+          charge_point_id: string
+          created_at: string | null
+          id: string
+          is_authorized: boolean | null
+          location: string | null
+          name: string
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          charge_point_id: string
+          created_at?: string | null
+          id?: string
+          is_authorized?: boolean | null
+          location?: string | null
+          name: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          charge_point_id?: string
+          created_at?: string | null
+          id?: string
+          is_authorized?: boolean | null
+          location?: string | null
+          name?: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       charging_stations: {
         Row: {
           charge_point_id: string

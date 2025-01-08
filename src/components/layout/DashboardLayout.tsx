@@ -1,7 +1,13 @@
-import { Battery, Bolt, Bus, Power } from "lucide-react";
+import { Battery, Bolt, Bus, Power, Menu } from "lucide-react";
 import { MetricsCard } from "../dashboard/MetricsCard";
 import { Link } from "react-router-dom";
 import { Button } from "../ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -19,6 +25,25 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
             </p>
           </div>
           <div className="flex items-center gap-4">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="icon">
+                  <Menu className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem asChild>
+                  <Link to="/" className="w-full">
+                    Dashboard
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/charger-config" className="w-full">
+                    Charger Configuration
+                  </Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             <Link to="/charger-config">
               <Button variant="outline">Charger Configuration</Button>
             </Link>
