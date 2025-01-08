@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabaseClient";
 import {
   Table,
@@ -10,18 +9,12 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { Eye, EyeOff } from "lucide-react";
+import { AddChargerDialog } from "@/components/charger-config/AddChargerDialog";
+import { ChargerBootNotification } from "@/components/charger-config/ChargerBootNotification";
 
 interface Charger {
   id: string;
@@ -31,19 +24,13 @@ interface Charger {
   status: string;
   is_authorized: boolean;
   password: string | null;
+  last_boot_payload: string | null;
 }
 
 const ChargerConfig = () => {
   const [chargers, setChargers] = useState<Charger[]>([]);
-  const [newCharger, setNewCharger] = useState({
-    charge_point_id: "",
-    name: "",
-    location: "",
-    password: "",
-  });
   const [showPasswords, setShowPasswords] = useState<{ [key: string]: boolean }>({});
   const { toast } = useToast();
-  const navigate = useNavigate();
 
   useEffect(() => {
     fetchChargers();
@@ -89,31 +76,6 @@ const ChargerConfig = () => {
     });
   };
 
-  const handleAddCharger = async () => {
-    const { error } = await supabase.from("chargers").insert([newCharger]);
-
-    if (error) {
-      toast({
-        title: "Error adding charger",
-        description: error.message,
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setNewCharger({
-      charge_point_id: "",
-      name: "",
-      location: "",
-      password: "",
-    });
-    fetchChargers();
-    toast({
-      title: "Charger added",
-      description: "New charger added successfully",
-    });
-  };
-
   const handleUpdatePassword = async (chargerId: string, newPassword: string) => {
     const { error } = await supabase
       .from("chargers")
@@ -144,117 +106,70 @@ const ChargerConfig = () => {
   };
 
   return (
-    <div className="container mx-auto py-8">
-      <div className="flex justify-between items-center mb-6">
+    <div className="container mx-auto py-8 space-y-8">
+      <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">Charger Configuration</h1>
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button>Add New Charger</Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Add New Charger</DialogTitle>
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="grid gap-2">
-                <Label htmlFor="charge_point_id">Charge Point ID</Label>
-                <Input
-                  id="charge_point_id"
-                  value={newCharger.charge_point_id}
-                  onChange={(e) =>
-                    setNewCharger({
-                      ...newCharger,
-                      charge_point_id: e.target.value,
-                    })
-                  }
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="name">Name</Label>
-                <Input
-                  id="name"
-                  value={newCharger.name}
-                  onChange={(e) =>
-                    setNewCharger({ ...newCharger, name: e.target.value })
-                  }
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="location">Location</Label>
-                <Input
-                  id="location"
-                  value={newCharger.location}
-                  onChange={(e) =>
-                    setNewCharger({ ...newCharger, location: e.target.value })
-                  }
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="password">Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={newCharger.password}
-                  onChange={(e) =>
-                    setNewCharger({ ...newCharger, password: e.target.value })
-                  }
-                />
-              </div>
-              <Button onClick={handleAddCharger}>Add Charger</Button>
-            </div>
-          </DialogContent>
-        </Dialog>
+        <AddChargerDialog onChargerAdded={fetchChargers} />
       </div>
 
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Charge Point ID</TableHead>
-            <TableHead>Name</TableHead>
-            <TableHead>Location</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Authorization</TableHead>
-            <TableHead>Password</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {chargers.map((charger) => (
-            <TableRow key={charger.id}>
-              <TableCell>{charger.charge_point_id}</TableCell>
-              <TableCell>{charger.name}</TableCell>
-              <TableCell>{charger.location}</TableCell>
-              <TableCell>{charger.status}</TableCell>
-              <TableCell>
-                <Switch
-                  checked={charger.is_authorized}
-                  onCheckedChange={(checked) =>
-                    handleAuthorization(charger.id, checked)
-                  }
-                />
-              </TableCell>
-              <TableCell className="flex items-center gap-2">
-                <Input
-                  type={showPasswords[charger.id] ? "text" : "password"}
-                  value={charger.password || ""}
-                  onChange={(e) => handleUpdatePassword(charger.id, e.target.value)}
-                  className="w-40"
-                />
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => togglePasswordVisibility(charger.id)}
-                >
-                  {showPasswords[charger.id] ? (
-                    <EyeOff className="h-4 w-4" />
-                  ) : (
-                    <Eye className="h-4 w-4" />
-                  )}
-                </Button>
-              </TableCell>
+      <div className="grid gap-6">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Charge Point ID</TableHead>
+              <TableHead>Name</TableHead>
+              <TableHead>Location</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Authorization</TableHead>
+              <TableHead>Password</TableHead>
+              <TableHead>Boot Notification</TableHead>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+          </TableHeader>
+          <TableBody>
+            {chargers.map((charger) => (
+              <TableRow key={charger.id}>
+                <TableCell>{charger.charge_point_id}</TableCell>
+                <TableCell>{charger.name}</TableCell>
+                <TableCell>{charger.location}</TableCell>
+                <TableCell>{charger.status}</TableCell>
+                <TableCell>
+                  <Switch
+                    checked={charger.is_authorized}
+                    onCheckedChange={(checked) =>
+                      handleAuthorization(charger.id, checked)
+                    }
+                  />
+                </TableCell>
+                <TableCell className="flex items-center gap-2">
+                  <Input
+                    type={showPasswords[charger.id] ? "text" : "password"}
+                    value={charger.password || ""}
+                    onChange={(e) => handleUpdatePassword(charger.id, e.target.value)}
+                    className="w-40"
+                  />
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => togglePasswordVisibility(charger.id)}
+                  >
+                    {showPasswords[charger.id] ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </Button>
+                </TableCell>
+                <TableCell>
+                  <ChargerBootNotification 
+                    chargerId={charger.charge_point_id}
+                    lastBootPayload={charger.last_boot_payload}
+                  />
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
     </div>
   );
 };
