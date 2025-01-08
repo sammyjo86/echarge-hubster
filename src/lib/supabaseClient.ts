@@ -1,12 +1,10 @@
 import { createClient } from '@supabase/supabase-js';
 
-// @ts-ignore - Lovable handles secrets differently than environment variables
-const supabaseUrl = process.env.SUPABASE_URL;
-// @ts-ignore - Lovable handles secrets differently than environment variables
-const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://lhwtwicfvzouosutiaap.supabase.co';
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing Supabase credentials. Please configure SUPABASE_URL and SUPABASE_ANON_KEY in your project settings.');
+  console.warn('Missing Supabase credentials');
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+export const supabase = createClient(supabaseUrl, supabaseAnonKey || '');
