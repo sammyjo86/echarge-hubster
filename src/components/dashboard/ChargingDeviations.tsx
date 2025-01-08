@@ -34,7 +34,7 @@ export const ChargingDeviations = () => {
         {
           event: '*',
           schema: 'public',
-          table: 'charging_transactions',
+          table: 'charging_transactions'
         },
         () => {
           fetchDeviations();
@@ -52,7 +52,7 @@ export const ChargingDeviations = () => {
       .from('charging_transactions')
       .select(`
         *,
-        charging_stations (
+        charging_stations!inner (
           charge_point_id,
           location
         )
@@ -121,8 +121,8 @@ export const ChargingDeviations = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {deviations.map((deviation) => (
-              <TableRow key={deviation.busId}>
+            {deviations.map((deviation, index) => (
+              <TableRow key={`${deviation.busId}-${index}`}>
                 <TableCell className="font-medium">{deviation.busId}</TableCell>
                 <TableCell className="text-destructive font-medium">
                   {deviation.soc}%
