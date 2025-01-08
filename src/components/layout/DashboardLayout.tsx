@@ -1,5 +1,7 @@
 import { Battery, Bolt, Bus, Power } from "lucide-react";
 import { MetricsCard } from "../dashboard/MetricsCard";
+import { Link } from "react-router-dom";
+import { Button } from "../ui/button";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -16,13 +18,14 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
               Monitor and manage your electric bus fleet charging operations
             </p>
           </div>
-          <img 
-            src="/nobina-logo.svg" 
-            alt="Nobina Logo" 
-            className="h-12"
-          />
+          <div className="flex items-center gap-4">
+            <Link to="/charger-config">
+              <Button variant="outline">Charger Configuration</Button>
+            </Link>
+            <img src="/nobina-logo.svg" alt="Nobina Logo" className="h-12" />
+          </div>
         </div>
-        
+
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <MetricsCard
             title="Total Energy Consumed"
@@ -49,7 +52,7 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
             description="Fleet-wide"
           />
         </div>
-        
+
         {children}
       </div>
     </div>
