@@ -15,6 +15,7 @@ export type Database = {
           created_at: string | null
           id: string
           is_authorized: boolean | null
+          last_boot_payload: Json | null
           location: string | null
           name: string
           password: string | null
@@ -26,6 +27,7 @@ export type Database = {
           created_at?: string | null
           id?: string
           is_authorized?: boolean | null
+          last_boot_payload?: Json | null
           location?: string | null
           name: string
           password?: string | null
@@ -37,6 +39,7 @@ export type Database = {
           created_at?: string | null
           id?: string
           is_authorized?: boolean | null
+          last_boot_payload?: Json | null
           location?: string | null
           name?: string
           password?: string | null

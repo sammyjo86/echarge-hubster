@@ -16,7 +16,7 @@ export const ChargerBootNotification = ({
   const handleBootNotification = async () => {
     try {
       const response = await fetch(
-        "wss://lhwtwicfvzouosutiaap.supabase.co/functions/v1/ocpp",
+        "https://lhwtwicfvzouosutiaap.supabase.co/functions/v1/ocpp",
         {
           method: "POST",
           headers: {
