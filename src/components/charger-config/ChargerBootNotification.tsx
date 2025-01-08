@@ -16,17 +16,17 @@ export const ChargerBootNotification = ({
 
   const handleBootNotification = async () => {
     try {
-      const { data, error } = await supabase.functions.invoke("ocpp", {
-        body: JSON.stringify([
-          2, // MessageTypeId for request
-          chargerId,
-          "BootNotification",
-          {
+      const { data, error } = await supabase.functions.invoke("ocpp-relay", {
+        body: {
+          messageType: "REQUEST",
+          chargePointId: chargerId,
+          action: "BootNotification",
+          payload: {
             chargePointVendor: "Test Vendor",
             chargePointModel: "Test Model",
             firmwareVersion: "1.0.0",
           },
-        ]),
+        },
       });
 
       if (error) {
