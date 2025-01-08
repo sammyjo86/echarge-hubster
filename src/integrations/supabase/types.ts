@@ -17,6 +17,7 @@ export type Database = {
           is_authorized: boolean | null
           location: string | null
           name: string
+          password: string | null
           status: string | null
           updated_at: string | null
         }
@@ -27,6 +28,7 @@ export type Database = {
           is_authorized?: boolean | null
           location?: string | null
           name: string
+          password?: string | null
           status?: string | null
           updated_at?: string | null
         }
@@ -37,6 +39,7 @@ export type Database = {
           is_authorized?: boolean | null
           location?: string | null
           name?: string
+          password?: string | null
           status?: string | null
           updated_at?: string | null
         }

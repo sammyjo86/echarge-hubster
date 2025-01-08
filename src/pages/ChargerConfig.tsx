@@ -21,6 +21,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/components/ui/use-toast";
+import { Eye, EyeOff } from "lucide-react";
 
 interface Charger {
   id: string;
@@ -29,6 +30,7 @@ interface Charger {
   location: string;
   status: string;
   is_authorized: boolean;
+  password: string | null;
 }
 
 const ChargerConfig = () => {
@@ -37,7 +39,9 @@ const ChargerConfig = () => {
     charge_point_id: "",
     name: "",
     location: "",
+    password: "",
   });
+  const [showPasswords, setShowPasswords] = useState<{ [key: string]: boolean }>({});
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -101,12 +105,42 @@ const ChargerConfig = () => {
       charge_point_id: "",
       name: "",
       location: "",
+      password: "",
     });
     fetchChargers();
     toast({
       title: "Charger added",
       description: "New charger added successfully",
     });
+  };
+
+  const handleUpdatePassword = async (chargerId: string, newPassword: string) => {
+    const { error } = await supabase
+      .from("chargers")
+      .update({ password: newPassword })
+      .eq("id", chargerId);
+
+    if (error) {
+      toast({
+        title: "Error updating password",
+        description: error.message,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    fetchChargers();
+    toast({
+      title: "Password updated",
+      description: "Charger password updated successfully",
+    });
+  };
+
+  const togglePasswordVisibility = (chargerId: string) => {
+    setShowPasswords(prev => ({
+      ...prev,
+      [chargerId]: !prev[chargerId]
+    }));
   };
 
   return (
@@ -155,6 +189,17 @@ const ChargerConfig = () => {
                   }
                 />
               </div>
+              <div className="grid gap-2">
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={newCharger.password}
+                  onChange={(e) =>
+                    setNewCharger({ ...newCharger, password: e.target.value })
+                  }
+                />
+              </div>
               <Button onClick={handleAddCharger}>Add Charger</Button>
             </div>
           </DialogContent>
@@ -169,6 +214,7 @@ const ChargerConfig = () => {
             <TableHead>Location</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Authorization</TableHead>
+            <TableHead>Password</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -185,6 +231,25 @@ const ChargerConfig = () => {
                     handleAuthorization(charger.id, checked)
                   }
                 />
+              </TableCell>
+              <TableCell className="flex items-center gap-2">
+                <Input
+                  type={showPasswords[charger.id] ? "text" : "password"}
+                  value={charger.password || ""}
+                  onChange={(e) => handleUpdatePassword(charger.id, e.target.value)}
+                  className="w-40"
+                />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => togglePasswordVisibility(charger.id)}
+                >
+                  {showPasswords[charger.id] ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                </Button>
               </TableCell>
             </TableRow>
           ))}
