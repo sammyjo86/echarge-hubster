@@ -11,176 +11,129 @@ const supabase = createClient(
   Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
 )
 
-serve(async (req) => {
-  // Check if this is a WebSocket connection attempt
-  const upgrade = req.headers.get('upgrade') || ''
-  const isWebSocket = upgrade.toLowerCase() === 'websocket'
+async function broadcastMessage(channel: string, event: string, payload: any) {
+  const { error } = await supabase
+    .channel(channel)
+    .send({
+      type: 'broadcast',
+      event: event,
+      payload: payload,
+    })
 
-  // If it's a WebSocket connection attempt, broadcast it
-  if (isWebSocket) {
-    console.log('WebSocket connection attempt detected')
+  if (error) {
+    console.error('Error broadcasting message:', error)
+  }
+}
+
+async function handleWebSocketConnection(req: Request) {
+  console.log('WebSocket connection attempt detected')
+  console.log('Request URL:', req.url)
+  console.log('Headers:', Object.fromEntries(req.headers.entries()))
+  
+  try {
+    const { socket, response } = Deno.upgradeWebSocket(req)
     
-    const { error: broadcastError } = await supabase
-      .channel('ocpp-messages')
-      .send({
-        type: 'broadcast',
-        event: 'ocpp_message',
+    socket.onopen = () => {
+      console.log('WebSocket connection opened successfully')
+      broadcastMessage('ocpp-messages', 'ocpp_message', {
+        messageType: 'CONNECTION',
+        messageId: crypto.randomUUID(),
+        action: 'WebSocket Connected',
         payload: {
-          messageType: 'CONNECTION',
-          messageId: crypto.randomUUID(),
-          action: 'WebSocket Connection Attempt',
-          payload: {
-            timestamp: new Date().toISOString(),
-            headers: Object.fromEntries(req.headers.entries())
-          },
+          timestamp: new Date().toISOString(),
+          status: 'connected'
         },
       })
-
-    if (broadcastError) {
-      console.error('Error broadcasting connection attempt:', broadcastError)
     }
 
-    // Proceed with WebSocket upgrade
-    try {
-      const { socket, response } = Deno.upgradeWebSocket(req)
-      
-      socket.onopen = () => {
-        console.log('WebSocket connection opened')
-        supabase
-          .channel('ocpp-messages')
-          .send({
-            type: 'broadcast',
-            event: 'ocpp_message',
-            payload: {
-              messageType: 'CONNECTION',
-              messageId: crypto.randomUUID(),
-              action: 'WebSocket Connected',
-              payload: {
-                timestamp: new Date().toISOString(),
-                status: 'connected'
-              },
-            },
-          })
-      }
+    socket.onclose = () => {
+      console.log('WebSocket connection closed')
+      broadcastMessage('ocpp-messages', 'ocpp_message', {
+        messageType: 'CONNECTION',
+        messageId: crypto.randomUUID(),
+        action: 'WebSocket Disconnected',
+        payload: {
+          timestamp: new Date().toISOString(),
+          status: 'disconnected'
+        },
+      })
+    }
 
-      socket.onclose = () => {
-        console.log('WebSocket connection closed')
-        supabase
-          .channel('ocpp-messages')
-          .send({
-            type: 'broadcast',
-            event: 'ocpp_message',
-            payload: {
-              messageType: 'CONNECTION',
-              messageId: crypto.randomUUID(),
-              action: 'WebSocket Disconnected',
-              payload: {
-                timestamp: new Date().toISOString(),
-                status: 'disconnected'
-              },
-            },
-          })
-      }
+    socket.onmessage = async (event) => {
+      try {
+        const message = JSON.parse(event.data)
+        console.log('Received WebSocket message:', message)
 
-      socket.onmessage = async (event) => {
-        try {
-          const message = JSON.parse(event.data)
-          console.log('Received WebSocket message:', message)
+        const [messageTypeId, uniqueId, action, payload] = message
 
-          const [messageTypeId, uniqueId, action, payload] = message
+        await broadcastMessage('ocpp-messages', 'ocpp_message', {
+          messageType: messageTypeId === 2 ? 'REQUEST' : 'RESPONSE',
+          messageId: uniqueId,
+          action,
+          payload,
+        })
 
-          // Broadcast the OCPP message to all subscribers
-          const { error: broadcastError } = await supabase
-            .channel('ocpp-messages')
-            .send({
-              type: 'broadcast',
-              event: 'ocpp_message',
-              payload: {
-                messageType: messageTypeId === 2 ? 'REQUEST' : 'RESPONSE',
-                messageId: uniqueId,
-                action,
-                payload,
-              },
-            })
+        if (messageTypeId === 2) {
+          switch (action) {
+            case "BootNotification": {
+              console.log('Processing boot notification:', payload)
+              
+              const { error: updateError } = await supabase
+                .from('chargers')
+                .update({ 
+                  last_boot_payload: payload,
+                  status: 'Available'
+                })
+                .eq('charge_point_id', uniqueId)
 
-          if (broadcastError) {
-            console.error('Error broadcasting message:', broadcastError)
-          }
-
-          if (messageTypeId === 2) { // Client-initiated request
-            switch (action) {
-              case "BootNotification": {
-                console.log('Processing boot notification:', payload)
-                
-                const { error: updateError } = await supabase
-                  .from('chargers')
-                  .update({ 
-                    last_boot_payload: payload,
-                    status: 'Available'
-                  })
-                  .eq('charge_point_id', uniqueId)
-
-                if (updateError) {
-                  console.error('Error updating charger:', updateError)
-                  throw updateError
-                }
-
-                const response = {
-                  status: "Accepted",
-                  currentTime: new Date().toISOString(),
-                  interval: 300
-                }
-
-                socket.send(JSON.stringify([3, uniqueId, response]))
-                break;
+              if (updateError) {
+                console.error('Error updating charger:', updateError)
+                throw updateError
               }
 
-              default:
-                console.log(`Unhandled action: ${action}`)
-                socket.send(JSON.stringify([4, uniqueId, "NotImplemented", {}, {}]))
+              const response = {
+                status: "Accepted",
+                currentTime: new Date().toISOString(),
+                interval: 300
+              }
+
+              socket.send(JSON.stringify([3, uniqueId, response]))
+              break;
             }
+            default:
+              console.log(`Unhandled action: ${action}`)
+              socket.send(JSON.stringify([4, uniqueId, "NotImplemented", {}, {}]))
           }
-        } catch (error) {
-          console.error('Error processing WebSocket message:', error)
         }
+      } catch (error) {
+        console.error('Error processing WebSocket message:', error)
       }
-
-      return response
-    } catch (error) {
-      console.error('WebSocket upgrade failed:', error)
-      return new Response('WebSocket upgrade failed', { status: 500, headers: corsHeaders })
     }
-  }
 
-  // Handle CORS preflight requests
-  if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders })
-  }
+    socket.onerror = (e) => {
+      console.error('WebSocket error:', e)
+    }
 
-  // Handle regular HTTP requests
+    return response
+  } catch (error) {
+    console.error('WebSocket upgrade failed:', error)
+    return new Response('WebSocket upgrade failed', { status: 500, headers: corsHeaders })
+  }
+}
+
+async function handleHttpRequest(req: Request) {
   try {
     const body = await req.json()
     console.log('Received HTTP message:', body)
 
     const [messageTypeId, uniqueId, action, payload] = body
 
-    // Broadcast the OCPP message to all subscribers
-    const { error: broadcastError } = await supabase
-      .channel('ocpp-messages')
-      .send({
-        type: 'broadcast',
-        event: 'ocpp_message',
-        payload: {
-          messageType: messageTypeId === 2 ? 'REQUEST' : 'RESPONSE',
-          messageId: uniqueId,
-          action,
-          payload,
-        },
-      })
-
-    if (broadcastError) {
-      console.error('Error broadcasting message:', broadcastError)
-    }
+    await broadcastMessage('ocpp-messages', 'ocpp_message', {
+      messageType: messageTypeId === 2 ? 'REQUEST' : 'RESPONSE',
+      messageId: uniqueId,
+      action,
+      payload,
+    })
 
     if (messageTypeId === 2) {
       switch (action) {
@@ -216,7 +169,6 @@ serve(async (req) => {
             }
           )
         }
-
         default:
           console.log(`Unhandled action: ${action}`)
           return new Response(
@@ -246,4 +198,20 @@ serve(async (req) => {
       }
     )
   }
+}
+
+serve(async (req) => {
+  // Handle CORS preflight requests
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders })
+  }
+
+  const upgrade = req.headers.get('upgrade') || ''
+  const isWebSocket = upgrade.toLowerCase() === 'websocket'
+
+  if (isWebSocket) {
+    return handleWebSocketConnection(req)
+  }
+
+  return handleHttpRequest(req)
 })
