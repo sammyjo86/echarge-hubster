@@ -9,11 +9,18 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   return (
     <div className="min-h-screen bg-background p-8">
       <div className="space-y-8">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
-          <p className="text-muted-foreground">
-            Monitor and manage your electric bus fleet charging operations
-          </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
+            <p className="text-muted-foreground">
+              Monitor and manage your electric bus fleet charging operations
+            </p>
+          </div>
+          <img 
+            src="/nobina-logo.svg" 
+            alt="Nobina Logo" 
+            className="h-12"
+          />
         </div>
         
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
