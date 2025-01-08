@@ -15,8 +15,8 @@ const ChargerBootNotification = ({ chargerId }: ChargerBootNotificationProps) =>
   const connectWebSocket = () => {
     setIsConnecting(true);
     
-    // Create WebSocket connection
-    const wsUrl = `wss://lhwtwicfvzouosutiaap.functions.supabase.co/ocpp-server?chargePointId=${chargerId}`;
+    // Create WebSocket connection with the correct Supabase Edge Function URL format
+    const wsUrl = `wss://lhwtwicfvzouosutiaap.supabase.co/functions/v1/ocpp-server?chargePointId=${chargerId}`;
     const ws = new WebSocket(wsUrl);
 
     ws.onopen = () => {
