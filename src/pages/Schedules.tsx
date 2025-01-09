@@ -1,6 +1,6 @@
 import { SchedulesDataTable } from "@/components/schedules/SchedulesDataTable";
 import { Button } from "@/components/ui/button";
-import { CalendarPlus, Plus, TestTube } from "lucide-react";
+import { CalendarPlus, Plus } from "lucide-react";
 import { Link } from "react-router-dom";
 import {
   Menubar,
@@ -36,10 +36,6 @@ export default function Schedules() {
                     New Schedule
                   </MenubarItem>
                 </Link>
-                <MenubarItem className="cursor-pointer">
-                  <TestTube className="mr-2 h-4 w-4" />
-                  Test
-                </MenubarItem>
               </MenubarContent>
             </MenubarMenu>
           </Menubar>
