@@ -1,5 +1,5 @@
 import { UseFormReturn } from "react-hook-form";
-import { ScheduleFormValues } from "./ScheduleFormComponent";
+import { ScheduleFormValues } from "./types";
 import { RecurringSection } from "./RecurringSection";
 import { RecurringDaysSelect } from "./RecurringDaysSelect";
 import { RecurringMonthsSelect } from "./RecurringMonthsSelect";

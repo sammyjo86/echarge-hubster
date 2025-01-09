@@ -6,7 +6,7 @@ import {
   FormLabel,
 } from "@/components/ui/form";
 import { UseFormReturn } from "react-hook-form";
-import { ScheduleFormValues } from "./ScheduleFormComponent";
+import { ScheduleFormValues } from "./types";
 
 const months = [
   { id: "january", label: "January" },

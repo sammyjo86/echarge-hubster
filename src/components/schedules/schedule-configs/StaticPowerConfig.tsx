@@ -15,7 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { UseFormReturn } from "react-hook-form";
-import { ScheduleFormValues } from "../ScheduleFormComponent";
+import { ScheduleFormValues } from "../types";
 import { supabase } from "@/integrations/supabase/client";
 
 interface Charger {

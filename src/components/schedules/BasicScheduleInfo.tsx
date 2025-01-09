@@ -8,7 +8,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { UseFormReturn } from "react-hook-form";
-import { ScheduleFormValues } from "./ScheduleFormComponent";
+import { ScheduleFormValues } from "./types";
 
 export function BasicScheduleInfo({
   form,

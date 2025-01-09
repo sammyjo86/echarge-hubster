@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { UseFormReturn } from "react-hook-form";
-import { ScheduleFormValues } from "../ScheduleFormComponent";
+import { ScheduleFormValues } from "../types";
 
 export function CapacityLimitConfig({
   form,

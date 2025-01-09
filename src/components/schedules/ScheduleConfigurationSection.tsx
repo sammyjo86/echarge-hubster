@@ -1,5 +1,5 @@
 import { UseFormReturn } from "react-hook-form";
-import { ScheduleFormValues } from "./ScheduleFormComponent";
+import { ScheduleFormValues } from "./types";
 import { StaticPowerConfig } from "./schedule-configs/StaticPowerConfig";
 import { CapacityLimitConfig } from "./schedule-configs/CapacityLimitConfig";
 import { EnergyPriceConfig } from "./schedule-configs/EnergyPriceConfig";

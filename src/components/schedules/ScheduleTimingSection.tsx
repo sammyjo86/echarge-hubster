@@ -1,5 +1,5 @@
 import { UseFormReturn } from "react-hook-form";
-import { ScheduleFormValues } from "./ScheduleFormComponent";
+import { ScheduleFormValues } from "./types";
 import { ScheduleDateTimeFields } from "./ScheduleDateTimeFields";
 import { RecurringSectionsGroup } from "./RecurringSectionsGroup";
 

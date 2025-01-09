@@ -1,7 +1,7 @@
 import { FormField, FormItem } from "@/components/ui/form";
 import { Switch } from "@/components/ui/switch";
 import { UseFormReturn } from "react-hook-form";
-import { ScheduleFormValues } from "./ScheduleFormComponent";
+import { ScheduleFormValues } from "./types";
 
 interface RecurringSectionProps {
   form: UseFormReturn<ScheduleFormValues>;
