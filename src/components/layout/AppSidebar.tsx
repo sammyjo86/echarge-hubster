@@ -31,7 +31,7 @@ const menuItems = [
 
 export function AppSidebar() {
   return (
-    <Sidebar className="border-r border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <Sidebar className="border-r border-border bg-background">
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel className="text-foreground/70">Navigation</SidebarGroupLabel>
