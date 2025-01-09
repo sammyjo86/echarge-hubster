@@ -1,5 +1,5 @@
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import { DepotMap } from "@/components/dashboard/DepotMap";
+import { ChargerOverview } from "@/components/dashboard/ChargerOverview";
 import { PowerMeter } from "@/components/dashboard/PowerMeter";
 import { ChargingDeviations } from "@/components/dashboard/ChargingDeviations";
 import {
@@ -19,7 +19,7 @@ const Index = () => {
           <ResizablePanelGroup direction="horizontal">
             <ResizablePanel defaultSize={50}>
               <div className="p-4">
-                <DepotMap />
+                <ChargerOverview />
               </div>
             </ResizablePanel>
             <ResizableHandle withHandle />
