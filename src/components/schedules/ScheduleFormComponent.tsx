@@ -17,13 +17,15 @@ const scheduleFormSchema = z.object({
   end: z.date(),
   time_zone_id: z.string().default("stockholm"),
   schedule_type: z.enum(["static_power", "capacity_limit", "energy_price", "parking_prohibited"]),
-  hasRecurringSettings: z.boolean().default(false),
+  useDays: z.boolean().default(false),
+  useMonths: z.boolean().default(false),
+  useHours: z.boolean().default(false),
   recurringDays: z.array(z.string()).optional(),
   recurringMonths: z.array(z.string()).optional(),
-  startTime: z.string().optional(),
-  endTime: z.string().optional(),
-  value: z.number().optional(),
-  chargers: z.array(z.string()).optional(),
+  recurringStartTime: z.string().optional(),
+  recurringEndTime: z.string().optional(),
+  staticPowerValue: z.number().optional(),
+  selectedChargers: z.array(z.string()).optional(),
   capacityLimit: z.number().optional(),
   energyPrice: z.number().optional(),
   gridConnectionTransformer: z.string().optional(),
@@ -45,13 +47,15 @@ export function ScheduleFormComponent() {
       end: new Date(),
       time_zone_id: "stockholm",
       schedule_type: "static_power",
-      hasRecurringSettings: false,
+      useDays: false,
+      useMonths: false,
+      useHours: false,
       recurringDays: [],
       recurringMonths: [],
-      startTime: undefined,
-      endTime: undefined,
-      value: undefined,
-      chargers: [],
+      recurringStartTime: undefined,
+      recurringEndTime: undefined,
+      staticPowerValue: undefined,
+      selectedChargers: [],
       capacityLimit: undefined,
       energyPrice: undefined,
       gridConnectionTransformer: "",
@@ -90,8 +94,8 @@ export function ScheduleFormComponent() {
             schedule_id: schedule.id,
             days: values.recurringDays,
             months: values.recurringMonths,
-            start_time: values.startTime,
-            end_time: values.endTime,
+            start_time: values.recurringStartTime,
+            end_time: values.recurringEndTime,
           });
 
         if (recurringError) throw recurringError;
@@ -102,8 +106,8 @@ export function ScheduleFormComponent() {
           .from("static_power_configs")
           .insert({
             schedule_id: schedule.id,
-            value: values.value,
-            chargers: values.chargers,
+            value: values.staticPowerValue,
+            chargers: values.selectedChargers,
           });
 
         if (configError) throw configError;

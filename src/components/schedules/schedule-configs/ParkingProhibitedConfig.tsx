@@ -57,12 +57,11 @@ export function ParkingProhibitedConfig({
                   field.onChange([...currentValues, value]);
                 }
               }}
-              value={field.value?.[0] || ""}
-              multiple
+              value={field.value?.[0] || ''}
             >
               <FormControl>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select chargers to apply parking prohibition" />
+                  <SelectValue placeholder="Select chargers to prohibit parking" />
                 </SelectTrigger>
               </FormControl>
               <SelectContent>

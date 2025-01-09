@@ -23,7 +23,11 @@ export function RecurringTimeSelect({ form }: RecurringTimeSelectProps) {
           <FormItem>
             <FormLabel>Daily Start Time</FormLabel>
             <FormControl>
-              <Input type="time" {...field} />
+              <Input 
+                type="time" 
+                {...field} 
+                value={field.value || ''}
+              />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -37,7 +41,11 @@ export function RecurringTimeSelect({ form }: RecurringTimeSelectProps) {
           <FormItem>
             <FormLabel>Daily End Time</FormLabel>
             <FormControl>
-              <Input type="time" {...field} />
+              <Input 
+                type="time" 
+                {...field} 
+                value={field.value || ''}
+              />
             </FormControl>
             <FormMessage />
           </FormItem>

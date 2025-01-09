@@ -54,6 +54,7 @@ export function StaticPowerConfig({
                 type="number"
                 placeholder="Enter power value"
                 {...field}
+                value={field.value || ''}
                 onChange={(e) => field.onChange(Number(e.target.value))}
               />
             </FormControl>
@@ -70,7 +71,7 @@ export function StaticPowerConfig({
             <FormLabel>Select Chargers</FormLabel>
             <Select
               onValueChange={field.onChange}
-              defaultValue={field.value}
+              value={field.value?.[0] || ''}
             >
               <FormControl>
                 <SelectTrigger>
