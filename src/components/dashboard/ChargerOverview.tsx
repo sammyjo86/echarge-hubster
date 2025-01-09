@@ -3,7 +3,8 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { StatusBadge } from "./StatusBadge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { EvStation } from "lucide-react";
+import { BatteryCharging } from "lucide-react";
+import { RealtimePostgresChangesPayload } from "@supabase/supabase-js";
 
 interface Charger {
   id: string;
@@ -13,6 +14,11 @@ interface Charger {
     id: number;
     status: "charging" | "available" | "offline" | "error";
   }[];
+}
+
+interface ChargingStationPayload {
+  id: string;
+  status: string;
 }
 
 export const ChargerOverview = () => {
@@ -28,7 +34,7 @@ export const ChargerOverview = () => {
           schema: 'public',
           table: 'charging_stations',
         },
-        (payload) => {
+        (payload: RealtimePostgresChangesPayload<ChargingStationPayload>) => {
           console.log('Charger status update:', payload);
           // Update the charger status in the UI
           if (payload.new) {
@@ -69,7 +75,7 @@ export const ChargerOverview = () => {
     <Card className="h-full">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <EvStation className="h-6 w-6" />
+          <BatteryCharging className="h-6 w-6" />
           Charger Status Overview
         </CardTitle>
       </CardHeader>
