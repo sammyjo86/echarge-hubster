@@ -6,15 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { RecurringDaysSelect } from "./RecurringDaysSelect";
-import { RecurringMonthsSelect } from "./RecurringMonthsSelect";
-import { RecurringTimeSelect } from "./RecurringTimeSelect";
-import { RecurringSection } from "./RecurringSection";
 import { BasicScheduleInfo } from "./BasicScheduleInfo";
 import { ScheduleDateTimeFields } from "./ScheduleDateTimeFields";
-import { StaticPowerConfig } from "./schedule-configs/StaticPowerConfig";
-import { CapacityLimitConfig } from "./schedule-configs/CapacityLimitConfig";
-import { EnergyPriceConfig } from "./schedule-configs/EnergyPriceConfig";
+import { ScheduleConfigurationSection } from "./ScheduleConfigurationSection";
+import { RecurringSectionsGroup } from "./RecurringSectionsGroup";
 
 const scheduleFormSchema = z.object({
   name: z.string().min(1, "Schedule name is required"),
@@ -35,7 +30,6 @@ const scheduleFormSchema = z.object({
   recurringMonths: z.array(z.string()).optional(),
   recurringStartTime: z.string().optional(),
   recurringEndTime: z.string().optional(),
-  // New fields for schedule type configurations
   staticPowerValue: z.number().optional(),
   capacityLimit: z.number().optional(),
   energyPrice: z.number().optional(),
@@ -70,7 +64,6 @@ export function ScheduleFormComponent() {
     },
   });
 
-  const scheduleType = form.watch("schedule_type");
   const hasRecurringSettings =
     form.watch("useDays") ||
     form.watch("useMonths") ||
@@ -107,7 +100,6 @@ export function ScheduleFormComponent() {
         if (recurrenceError) throw recurrenceError;
       }
 
-      // Insert schedule type specific configurations
       if (scheduleData) {
         switch (values.schedule_type) {
           case "static_power":
@@ -168,46 +160,9 @@ export function ScheduleFormComponent() {
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <BasicScheduleInfo form={form} />
+        <ScheduleConfigurationSection form={form} />
         <ScheduleDateTimeFields form={form} />
-
-        <div className="space-y-4">
-          <RecurringSection
-            form={form}
-            title="Recurring Days"
-            description="Configure which days this schedule should repeat on"
-            fieldName="useDays"
-          >
-            <RecurringDaysSelect form={form} />
-          </RecurringSection>
-
-          <RecurringSection
-            form={form}
-            title="Recurring Months"
-            description="Configure which months this schedule should be active in"
-            fieldName="useMonths"
-          >
-            <RecurringMonthsSelect form={form} />
-          </RecurringSection>
-
-          <RecurringSection
-            form={form}
-            title="Recurring Hours"
-            description="Configure the daily time window for this schedule"
-            fieldName="useHours"
-          >
-            <RecurringTimeSelect form={form} />
-          </RecurringSection>
-        </div>
-
-        <div className="space-y-4 rounded-lg border p-4">
-          <h3 className="text-lg font-medium">Schedule Configuration</h3>
-          {scheduleType === "static_power" && <StaticPowerConfig form={form} />}
-          {scheduleType === "capacity_limit" && (
-            <CapacityLimitConfig form={form} />
-          )}
-          {scheduleType === "energy_price" && <EnergyPriceConfig form={form} />}
-        </div>
-
+        <RecurringSectionsGroup form={form} />
         <Button type="submit">Create Schedule</Button>
       </form>
     </Form>

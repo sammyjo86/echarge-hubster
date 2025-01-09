@@ -32,8 +32,6 @@ export function BasicScheduleInfo({
         )}
       />
 
-      <ScheduleTypeSelect form={form} />
-
       <FormField
         control={form.control}
         name="description"
@@ -47,6 +45,8 @@ export function BasicScheduleInfo({
           </FormItem>
         )}
       />
+
+      <ScheduleTypeSelect form={form} />
     </div>
   );
 }
