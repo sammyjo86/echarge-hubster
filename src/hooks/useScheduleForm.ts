@@ -1,82 +1,9 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-
-const scheduleFormSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  description: z.string().optional(),
-  start: z.date(),
-  end: z.date(),
-  time_zone_id: z.string().default("stockholm"),
-  schedule_type: z.enum(["static_power", "capacity_limit", "energy_price", "parking_prohibited"]),
-  useDays: z.boolean().default(false),
-  useMonths: z.boolean().default(false),
-  useHours: z.boolean().default(false),
-  recurringDays: z.array(z.string()).optional(),
-  recurringMonths: z.array(z.string()).optional(),
-  recurringStartTime: z.string().optional(),
-  recurringEndTime: z.string().optional(),
-  staticPowerValue: z.number().optional(),
-  selectedChargers: z.array(z.string()).optional(),
-  capacityLimit: z.number().optional(),
-  energyPrice: z.number().optional(),
-  gridConnectionTransformer: z.string().optional(),
-  parkingProhibitedChargers: z.array(z.string()).optional(),
-});
-
-export type ScheduleFormValues = z.infer<typeof scheduleFormSchema>;
-
-async function handleRecurringPattern(scheduleId: string, values: ScheduleFormValues) {
-  const { error } = await supabase
-    .from("recurrence_patterns")
-    .insert({
-      schedule_id: scheduleId,
-      recurring_days: values.recurringDays,
-      start_time: values.recurringStartTime,
-      end_time: values.recurringEndTime,
-    });
-
-  if (error) throw error;
-}
-
-async function handleStaticPowerOverride(scheduleId: string, values: ScheduleFormValues) {
-  const { error } = await supabase
-    .from("static_power_overrides")
-    .insert({
-      schedule_id: scheduleId,
-      value: values.staticPowerValue,
-      chargers: values.selectedChargers,
-    });
-
-  if (error) throw error;
-}
-
-async function handleCapacityLimitOverride(scheduleId: string, values: ScheduleFormValues) {
-  const { error } = await supabase
-    .from("capacity_limit_overrides")
-    .insert({
-      schedule_id: scheduleId,
-      capacity_limit: values.capacityLimit,
-      grid_connection_transformer: values.gridConnectionTransformer,
-    });
-
-  if (error) throw error;
-}
-
-async function handleEnergyPriceOverride(scheduleId: string, values: ScheduleFormValues) {
-  const { error } = await supabase
-    .from("energy_price_overrides")
-    .insert({
-      schedule_id: scheduleId,
-      price: values.energyPrice,
-      grid_connection_transformer: values.gridConnectionTransformer,
-    });
-
-  if (error) throw error;
-}
+import { scheduleFormSchema, type ScheduleFormValues } from "@/components/schedules/types";
 
 export function useScheduleForm() {
   const { toast } = useToast();
@@ -131,19 +58,52 @@ export function useScheduleForm() {
       if (scheduleError) throw scheduleError;
 
       if (hasRecurringSettings) {
-        await handleRecurringPattern(schedule.id, values);
+        const { error: recurrenceError } = await supabase
+          .from("recurrence_patterns")
+          .insert({
+            schedule_id: schedule.id,
+            recurring_days: values.recurringDays,
+            start_time: values.recurringStartTime,
+            end_time: values.recurringEndTime,
+          });
+
+        if (recurrenceError) throw recurrenceError;
       }
 
       switch (values.schedule_type) {
-        case "static_power":
-          await handleStaticPowerOverride(schedule.id, values);
+        case "static_power": {
+          const { error } = await supabase
+            .from("static_power_overrides")
+            .insert({
+              schedule_id: schedule.id,
+              value: values.staticPowerValue,
+              chargers: values.selectedChargers,
+            });
+          if (error) throw error;
           break;
-        case "capacity_limit":
-          await handleCapacityLimitOverride(schedule.id, values);
+        }
+        case "capacity_limit": {
+          const { error } = await supabase
+            .from("capacity_limit_overrides")
+            .insert({
+              schedule_id: schedule.id,
+              capacity_limit: values.capacityLimit,
+              grid_connection_transformer: values.gridConnectionTransformer,
+            });
+          if (error) throw error;
           break;
-        case "energy_price":
-          await handleEnergyPriceOverride(schedule.id, values);
+        }
+        case "energy_price": {
+          const { error } = await supabase
+            .from("energy_price_overrides")
+            .insert({
+              schedule_id: schedule.id,
+              price: values.energyPrice,
+              grid_connection_transformer: values.gridConnectionTransformer,
+            });
+          if (error) throw error;
           break;
+        }
       }
 
       toast({
