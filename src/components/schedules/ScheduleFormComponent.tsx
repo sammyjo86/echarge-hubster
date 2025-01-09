@@ -31,6 +31,7 @@ const scheduleFormSchema = z.object({
   recurringStartTime: z.string().optional(),
   recurringEndTime: z.string().optional(),
   staticPowerValue: z.number().optional(),
+  selectedChargers: z.string().optional(),
   capacityLimit: z.number().optional(),
   energyPrice: z.number().optional(),
   gridConnectionTransformer: z.string().optional(),
@@ -58,6 +59,7 @@ export function ScheduleFormComponent() {
       recurringStartTime: "",
       recurringEndTime: "",
       staticPowerValue: undefined,
+      selectedChargers: undefined,
       capacityLimit: undefined,
       energyPrice: undefined,
       gridConnectionTransformer: "",
@@ -109,6 +111,7 @@ export function ScheduleFormComponent() {
                 .insert({
                   schedule_id: scheduleData.id,
                   value: values.staticPowerValue,
+                  chargers: values.selectedChargers ? [values.selectedChargers] : [],
                 });
               if (error) throw error;
             }
