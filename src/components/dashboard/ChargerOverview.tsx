@@ -53,7 +53,7 @@ export const ChargerOverview = () => {
     const initializeChargers = () => {
       const initialChargers: Charger[] = Array.from({ length: 50 }, (_, i) => ({
         id: `charger-${i + 1}`,
-        name: `Station ${i + 1}`,
+        name: `L${(i + 1).toString().padStart(4, '0')}`,
         status: Math.random() > 0.7 ? "charging" : "available",
         connectors: Array.from({ length: 2 }, (_, j) => ({
           id: j + 1,
