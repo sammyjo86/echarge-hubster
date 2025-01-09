@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { BatteryCharging } from "lucide-react";
 import { RealtimePostgresChangesPayload } from "@supabase/supabase-js";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 
 interface Charger {
   id: string;
@@ -13,6 +14,9 @@ interface Charger {
     id: number;
     name: string;
     status: "charging" | "available" | "offline" | "error";
+    connectedBus?: string;
+    meterValue?: number;
+    lastUpdated?: string;
   }[];
 }
 
@@ -59,6 +63,9 @@ export const ChargerOverview = () => {
           id: j + 1,
           name: `A${(i * 2 + j + 404).toString().padStart(3, '0')}`,
           status: Math.random() > 0.7 ? "charging" : "available",
+          connectedBus: Math.random() > 0.7 ? `Bus ${Math.floor(Math.random() * 100)}` : undefined,
+          meterValue: Math.random() > 0.5 ? Math.floor(Math.random() * 100) : undefined,
+          lastUpdated: Math.random() > 0.5 ? new Date().toISOString() : undefined,
         })),
       }));
       setChargers(initialChargers);
@@ -94,16 +101,42 @@ export const ChargerOverview = () => {
                     {charger.name}
                   </div>
                   {charger.connectors.map((connector) => (
-                    <div
-                      key={`${charger.id}-${connector.id}`}
-                      className={`text-[10px] px-1 py-0.5 rounded ${
-                        connector.status === "charging" 
-                          ? "bg-blue-500/20 text-blue-700" 
-                          : "bg-gray-100"
-                      }`}
-                    >
-                      {connector.name}
-                    </div>
+                    <HoverCard key={`${charger.id}-${connector.id}`}>
+                      <HoverCardTrigger asChild>
+                        <div
+                          className={`text-[10px] px-1 py-0.5 rounded cursor-help ${
+                            connector.status === "charging" 
+                              ? "bg-blue-500/20 text-blue-700" 
+                              : "bg-gray-100"
+                          }`}
+                        >
+                          {connector.name}
+                        </div>
+                      </HoverCardTrigger>
+                      <HoverCardContent className="w-48">
+                        <div className="space-y-1">
+                          <p className="text-sm font-medium">Connector {connector.name}</p>
+                          <p className="text-xs text-muted-foreground capitalize">
+                            Status: {connector.status}
+                          </p>
+                          {connector.connectedBus && (
+                            <p className="text-xs text-muted-foreground">
+                              Connected to: {connector.connectedBus}
+                            </p>
+                          )}
+                          {connector.meterValue !== undefined && (
+                            <p className="text-xs text-muted-foreground">
+                              Current Power: {connector.meterValue} kW
+                            </p>
+                          )}
+                          {connector.lastUpdated && (
+                            <p className="text-xs text-muted-foreground">
+                              Last Updated: {new Date(connector.lastUpdated).toLocaleTimeString()}
+                            </p>
+                          )}
+                        </div>
+                      </HoverCardContent>
+                    </HoverCard>
                   ))}
                 </CardContent>
               </Card>
