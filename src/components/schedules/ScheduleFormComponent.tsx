@@ -3,22 +3,15 @@ import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { Form } from "@/components/ui/form";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { RecurringDaysSelect } from "./RecurringDaysSelect";
 import { RecurringMonthsSelect } from "./RecurringMonthsSelect";
 import { RecurringTimeSelect } from "./RecurringTimeSelect";
 import { RecurringSection } from "./RecurringSection";
+import { BasicScheduleInfo } from "./BasicScheduleInfo";
+import { ScheduleDateTimeFields } from "./ScheduleDateTimeFields";
 
 const scheduleFormSchema = z.object({
   name: z.string().min(1, "Schedule name is required"),
@@ -26,6 +19,12 @@ const scheduleFormSchema = z.object({
   start: z.string().min(1, "Start date and time is required"),
   end: z.string().min(1, "End date and time is required"),
   time_zone_id: z.string().default("stockholm"),
+  schedule_type: z.enum([
+    "static_power",
+    "capacity_limit",
+    "parking_prohibited",
+    "energy_price",
+  ]).default("static_power"),
   useDays: z.boolean().default(false),
   useMonths: z.boolean().default(false),
   useHours: z.boolean().default(false),
@@ -48,6 +47,7 @@ export function ScheduleFormComponent() {
       start: "",
       end: "",
       time_zone_id: "stockholm",
+      schedule_type: "static_power",
       useDays: false,
       useMonths: false,
       useHours: false,
@@ -58,11 +58,13 @@ export function ScheduleFormComponent() {
     },
   });
 
-  const hasRecurringSettings = form.watch("useDays") || form.watch("useMonths") || form.watch("useHours");
+  const hasRecurringSettings =
+    form.watch("useDays") ||
+    form.watch("useMonths") ||
+    form.watch("useHours");
 
   async function onSubmit(values: ScheduleFormValues) {
     try {
-      // First, create the schedule
       const { data: scheduleData, error: scheduleError } = await supabase
         .from("schedules")
         .insert({
@@ -72,13 +74,13 @@ export function ScheduleFormComponent() {
           end: new Date(values.end).toISOString(),
           recurring: hasRecurringSettings,
           time_zone_id: values.time_zone_id,
+          schedule_type: values.schedule_type,
         })
         .select()
         .single();
 
       if (scheduleError) throw scheduleError;
 
-      // If it has recurring settings, create the recurrence pattern
       if (hasRecurringSettings && scheduleData) {
         const { error: recurrenceError } = await supabase
           .from("recurrence_patterns")
@@ -111,66 +113,8 @@ export function ScheduleFormComponent() {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Schedule Name</FormLabel>
-              <FormControl>
-                <Input placeholder="Enter schedule name" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Description</FormLabel>
-              <FormControl>
-                <Textarea
-                  placeholder="Enter schedule description"
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <div className="grid grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="start"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Start Date & Time</FormLabel>
-                <FormControl>
-                  <Input type="datetime-local" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="end"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>End Date & Time</FormLabel>
-                <FormControl>
-                  <Input type="datetime-local" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
+        <BasicScheduleInfo form={form} />
+        <ScheduleDateTimeFields form={form} />
 
         <div className="space-y-4">
           <RecurringSection

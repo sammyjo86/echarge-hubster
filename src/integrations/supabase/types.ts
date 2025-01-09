@@ -257,6 +257,7 @@ export type Database = {
           id: string
           name: string
           recurring: boolean | null
+          schedule_type: string | null
           start: string
           time_zone_id: string | null
           updated_at: string | null
@@ -269,6 +270,7 @@ export type Database = {
           id?: string
           name: string
           recurring?: boolean | null
+          schedule_type?: string | null
           start: string
           time_zone_id?: string | null
           updated_at?: string | null
@@ -281,6 +283,7 @@ export type Database = {
           id?: string
           name?: string
           recurring?: boolean | null
+          schedule_type?: string | null
           start?: string
           time_zone_id?: string | null
           updated_at?: string | null
