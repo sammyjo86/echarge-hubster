@@ -9,7 +9,6 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { UseFormReturn } from "react-hook-form";
 import { ScheduleFormValues } from "./ScheduleFormComponent";
-import { ScheduleTypeSelect } from "./ScheduleTypeSelect";
 
 export function BasicScheduleInfo({
   form,
@@ -45,8 +44,6 @@ export function BasicScheduleInfo({
           </FormItem>
         )}
       />
-
-      <ScheduleTypeSelect form={form} />
     </div>
   );
 }
