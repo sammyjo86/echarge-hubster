@@ -14,19 +14,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-
-const daysOfWeek = [
-  { id: "monday", label: "Monday" },
-  { id: "tuesday", label: "Tuesday" },
-  { id: "wednesday", label: "Wednesday" },
-  { id: "thursday", label: "Thursday" },
-  { id: "friday", label: "Friday" },
-  { id: "saturday", label: "Saturday" },
-  { id: "sunday", label: "Sunday" },
-] as const;
+import { RecurringDaysSelect } from "./RecurringDaysSelect";
+import { RecurringMonthsSelect } from "./RecurringMonthsSelect";
+import { RecurringTimeSelect } from "./RecurringTimeSelect";
 
 const scheduleFormSchema = z.object({
   name: z.string().min(1, "Schedule name is required"),
@@ -36,11 +28,12 @@ const scheduleFormSchema = z.object({
   recurring: z.boolean().default(false),
   time_zone_id: z.string().default("stockholm"),
   recurringDays: z.array(z.string()).optional(),
+  recurringMonths: z.array(z.string()).optional(),
   recurringStartTime: z.string().optional(),
   recurringEndTime: z.string().optional(),
 });
 
-type ScheduleFormValues = z.infer<typeof scheduleFormSchema>;
+export type ScheduleFormValues = z.infer<typeof scheduleFormSchema>;
 
 export function ScheduleFormComponent() {
   const { toast } = useToast();
@@ -55,6 +48,7 @@ export function ScheduleFormComponent() {
       recurring: false,
       time_zone_id: "stockholm",
       recurringDays: [],
+      recurringMonths: [],
       recurringStartTime: "",
       recurringEndTime: "",
     },
@@ -197,82 +191,9 @@ export function ScheduleFormComponent() {
 
         {isRecurring && (
           <div className="space-y-4">
-            <FormField
-              control={form.control}
-              name="recurringDays"
-              render={() => (
-                <FormItem>
-                  <div className="mb-4">
-                    <FormLabel>Recurring Days</FormLabel>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    {daysOfWeek.map((day) => (
-                      <FormField
-                        key={day.id}
-                        control={form.control}
-                        name="recurringDays"
-                        render={({ field }) => {
-                          return (
-                            <FormItem
-                              key={day.id}
-                              className="flex flex-row items-start space-x-3 space-y-0"
-                            >
-                              <FormControl>
-                                <Checkbox
-                                  checked={field.value?.includes(day.id)}
-                                  onCheckedChange={(checked) => {
-                                    return checked
-                                      ? field.onChange([...field.value || [], day.id])
-                                      : field.onChange(
-                                          field.value?.filter(
-                                            (value) => value !== day.id
-                                          )
-                                        );
-                                  }}
-                                />
-                              </FormControl>
-                              <FormLabel className="font-normal">
-                                {day.label}
-                              </FormLabel>
-                            </FormItem>
-                          );
-                        }}
-                      />
-                    ))}
-                  </div>
-                </FormItem>
-              )}
-            />
-
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="recurringStartTime"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Daily Start Time</FormLabel>
-                    <FormControl>
-                      <Input type="time" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="recurringEndTime"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Daily End Time</FormLabel>
-                    <FormControl>
-                      <Input type="time" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+            <RecurringDaysSelect form={form} />
+            <RecurringMonthsSelect form={form} />
+            <RecurringTimeSelect form={form} />
           </div>
         )}
 
