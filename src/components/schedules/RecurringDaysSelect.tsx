@@ -30,7 +30,7 @@ export function RecurringDaysSelect({ form }: RecurringDaysSelectProps) {
       render={() => (
         <FormItem>
           <div className="mb-4">
-            <FormLabel>Recurring Days</FormLabel>
+            <FormLabel>Select Days</FormLabel>
           </div>
           <div className="grid grid-cols-2 gap-4">
             {daysOfWeek.map((day) => (

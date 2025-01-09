@@ -35,7 +35,7 @@ export function RecurringMonthsSelect({ form }: RecurringMonthsSelectProps) {
       render={() => (
         <FormItem>
           <div className="mb-4">
-            <FormLabel>Recurring Months</FormLabel>
+            <FormLabel>Select Months</FormLabel>
           </div>
           <div className="grid grid-cols-3 gap-4">
             {months.map((month) => (

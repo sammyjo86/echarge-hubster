@@ -19,6 +19,7 @@ import { useToast } from "@/hooks/use-toast";
 import { RecurringDaysSelect } from "./RecurringDaysSelect";
 import { RecurringMonthsSelect } from "./RecurringMonthsSelect";
 import { RecurringTimeSelect } from "./RecurringTimeSelect";
+import { RecurringSection } from "./RecurringSection";
 
 const scheduleFormSchema = z.object({
   name: z.string().min(1, "Schedule name is required"),
@@ -27,6 +28,9 @@ const scheduleFormSchema = z.object({
   end: z.string().min(1, "End date and time is required"),
   recurring: z.boolean().default(false),
   time_zone_id: z.string().default("stockholm"),
+  useDays: z.boolean().default(false),
+  useMonths: z.boolean().default(false),
+  useHours: z.boolean().default(false),
   recurringDays: z.array(z.string()).optional(),
   recurringMonths: z.array(z.string()).optional(),
   recurringStartTime: z.string().optional(),
@@ -47,6 +51,9 @@ export function ScheduleFormComponent() {
       end: "",
       recurring: false,
       time_zone_id: "stockholm",
+      useDays: false,
+      useMonths: false,
+      useHours: false,
       recurringDays: [],
       recurringMonths: [],
       recurringStartTime: "",
@@ -191,9 +198,32 @@ export function ScheduleFormComponent() {
 
         {isRecurring && (
           <div className="space-y-4">
-            <RecurringDaysSelect form={form} />
-            <RecurringMonthsSelect form={form} />
-            <RecurringTimeSelect form={form} />
+            <RecurringSection
+              form={form}
+              title="Days"
+              description="Configure which days this schedule should repeat on"
+              fieldName="useDays"
+            >
+              <RecurringDaysSelect form={form} />
+            </RecurringSection>
+
+            <RecurringSection
+              form={form}
+              title="Months"
+              description="Configure which months this schedule should be active in"
+              fieldName="useMonths"
+            >
+              <RecurringMonthsSelect form={form} />
+            </RecurringSection>
+
+            <RecurringSection
+              form={form}
+              title="Hours"
+              description="Configure the daily time window for this schedule"
+              fieldName="useHours"
+            >
+              <RecurringTimeSelect form={form} />
+            </RecurringSection>
           </div>
         )}
 
