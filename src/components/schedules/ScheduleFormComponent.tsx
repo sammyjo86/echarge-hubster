@@ -7,9 +7,8 @@ import { Form } from "@/components/ui/form";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { BasicScheduleInfo } from "./BasicScheduleInfo";
-import { ScheduleDateTimeFields } from "./ScheduleDateTimeFields";
 import { ScheduleConfigurationSection } from "./ScheduleConfigurationSection";
-import { RecurringSectionsGroup } from "./RecurringSectionsGroup";
+import { ScheduleTimingSection } from "./ScheduleTimingSection";
 
 const scheduleFormSchema = z.object({
   name: z.string().min(1, "Schedule name is required"),
@@ -164,8 +163,7 @@ export function ScheduleFormComponent() {
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <BasicScheduleInfo form={form} />
         <ScheduleConfigurationSection form={form} />
-        <ScheduleDateTimeFields form={form} />
-        <RecurringSectionsGroup form={form} />
+        <ScheduleTimingSection form={form} />
         <Button type="submit">Create Schedule</Button>
       </form>
     </Form>
