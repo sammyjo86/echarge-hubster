@@ -11,7 +11,7 @@ function App() {
       <SidebarProvider>
         <div className="min-h-screen flex w-full bg-background">
           <AppSidebar />
-          <main className="flex-1">
+          <main className="flex-1 bg-background">
             <div className="p-4">
               <SidebarTrigger className="mb-4 bg-background hover:bg-accent" />
               <Routes>
