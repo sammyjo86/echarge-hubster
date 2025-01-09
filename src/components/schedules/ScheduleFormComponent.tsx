@@ -13,17 +13,17 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
 const scheduleFormSchema = z.object({
-  garage: z.string().min(1, "Garage is required"),
-  schedule_name: z.string().min(1, "Schedule name is required"),
+  name: z.string().min(1, "Schedule name is required"),
   description: z.string().optional(),
-  start_date: z.string().min(1, "Start date is required"),
-  end_date: z.string().min(1, "End date is required"),
-  start_time: z.string().min(1, "Start time is required"),
-  end_time: z.string().min(1, "End time is required"),
+  start: z.string().min(1, "Start date and time is required"),
+  end: z.string().min(1, "End date and time is required"),
+  recurring: z.boolean().default(false),
+  time_zone_id: z.string().default("stockholm"),
 });
 
 type ScheduleFormValues = z.infer<typeof scheduleFormSchema>;
@@ -34,33 +34,31 @@ export function ScheduleFormComponent() {
   const form = useForm<ScheduleFormValues>({
     resolver: zodResolver(scheduleFormSchema),
     defaultValues: {
-      garage: "",
-      schedule_name: "",
+      name: "",
       description: "",
-      start_date: "",
-      end_date: "",
-      start_time: "",
-      end_time: "",
+      start: "",
+      end: "",
+      recurring: false,
+      time_zone_id: "stockholm",
     },
   });
 
   async function onSubmit(values: ScheduleFormValues) {
     try {
-      const { error } = await supabase.from("charging_schedules").insert({
-        garage: values.garage,
-        schedule_name: values.schedule_name,
+      const { data, error } = await supabase.from("schedules").insert({
+        name: values.name,
         description: values.description,
-        start_date: values.start_date,
-        end_date: values.end_date,
-        start_time: values.start_time,
-        end_time: values.end_time,
-      });
+        start: new Date(values.start).toISOString(),
+        end: new Date(values.end).toISOString(),
+        recurring: values.recurring,
+        time_zone_id: values.time_zone_id,
+      }).select();
       
       if (error) throw error;
 
       toast({
         title: "Schedule created",
-        description: "Your charging schedule has been created successfully.",
+        description: "Your schedule has been created successfully.",
       });
       
       navigate("/schedules");
@@ -70,6 +68,7 @@ export function ScheduleFormComponent() {
         description: "There was an error creating the schedule.",
         variant: "destructive",
       });
+      console.error("Error creating schedule:", error);
     }
   }
 
@@ -78,21 +77,7 @@ export function ScheduleFormComponent() {
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <FormField
           control={form.control}
-          name="garage"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Garage</FormLabel>
-              <FormControl>
-                <Input placeholder="Enter garage name" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="schedule_name"
+          name="name"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Schedule Name</FormLabel>
@@ -124,12 +109,12 @@ export function ScheduleFormComponent() {
         <div className="grid grid-cols-2 gap-4">
           <FormField
             control={form.control}
-            name="start_date"
+            name="start"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Start Date</FormLabel>
+                <FormLabel>Start Date & Time</FormLabel>
                 <FormControl>
-                  <Input type="date" {...field} />
+                  <Input type="datetime-local" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -138,12 +123,12 @@ export function ScheduleFormComponent() {
 
           <FormField
             control={form.control}
-            name="end_date"
+            name="end"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>End Date</FormLabel>
+                <FormLabel>End Date & Time</FormLabel>
                 <FormControl>
-                  <Input type="date" {...field} />
+                  <Input type="datetime-local" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -151,35 +136,26 @@ export function ScheduleFormComponent() {
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="start_time"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Start Time</FormLabel>
-                <FormControl>
-                  <Input type="time" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="end_time"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>End Time</FormLabel>
-                <FormControl>
-                  <Input type="time" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
+        <FormField
+          control={form.control}
+          name="recurring"
+          render={({ field }) => (
+            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+              <div className="space-y-0.5">
+                <FormLabel className="text-base">Recurring Schedule</FormLabel>
+                <div className="text-sm text-muted-foreground">
+                  Enable if this is a recurring schedule
+                </div>
+              </div>
+              <FormControl>
+                <Switch
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+              </FormControl>
+            </FormItem>
+          )}
+        />
 
         <Button type="submit">Create Schedule</Button>
       </form>

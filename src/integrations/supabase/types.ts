@@ -9,6 +9,41 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      capacity_limit_overrides: {
+        Row: {
+          capacity_limit: number
+          created_at: string | null
+          grid_connection_transformer: string
+          id: string
+          schedule_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          capacity_limit: number
+          created_at?: string | null
+          grid_connection_transformer: string
+          id?: string
+          schedule_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          capacity_limit?: number
+          created_at?: string | null
+          grid_connection_transformer?: string
+          id?: string
+          schedule_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "capacity_limit_overrides_schedule_id_fkey"
+            columns: ["schedule_id"]
+            isOneToOne: false
+            referencedRelation: "schedules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       chargers: {
         Row: {
           charge_point_id: string
@@ -44,45 +79,6 @@ export type Database = {
           name?: string
           password?: string | null
           status?: string | null
-          updated_at?: string | null
-        }
-        Relationships: []
-      }
-      charging_schedules: {
-        Row: {
-          created_at: string | null
-          description: string | null
-          end_date: string
-          end_time: string
-          garage: string
-          id: string
-          schedule_name: string
-          start_date: string
-          start_time: string
-          updated_at: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          description?: string | null
-          end_date: string
-          end_time: string
-          garage: string
-          id?: string
-          schedule_name: string
-          start_date: string
-          start_time: string
-          updated_at?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          description?: string | null
-          end_date?: string
-          end_time?: string
-          garage?: string
-          id?: string
-          schedule_name?: string
-          start_date?: string
-          start_time?: string
           updated_at?: string | null
         }
         Relationships: []
@@ -169,6 +165,159 @@ export type Database = {
             columns: ["station_id"]
             isOneToOne: false
             referencedRelation: "charging_stations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      energy_price_overrides: {
+        Row: {
+          created_at: string | null
+          grid_connection_transformer: string
+          id: string
+          price: number
+          schedule_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          grid_connection_transformer: string
+          id?: string
+          price: number
+          schedule_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          grid_connection_transformer?: string
+          id?: string
+          price?: number
+          schedule_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "energy_price_overrides_schedule_id_fkey"
+            columns: ["schedule_id"]
+            isOneToOne: false
+            referencedRelation: "schedules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      recurrence_patterns: {
+        Row: {
+          created_at: string | null
+          end_days: string[] | null
+          end_time: string
+          id: string
+          recurring_days: string[] | null
+          schedule_id: string | null
+          start_day: string | null
+          start_time: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          end_days?: string[] | null
+          end_time: string
+          id?: string
+          recurring_days?: string[] | null
+          schedule_id?: string | null
+          start_day?: string | null
+          start_time: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          end_days?: string[] | null
+          end_time?: string
+          id?: string
+          recurring_days?: string[] | null
+          schedule_id?: string | null
+          start_day?: string | null
+          start_time?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recurrence_patterns_schedule_id_fkey"
+            columns: ["schedule_id"]
+            isOneToOne: false
+            referencedRelation: "schedules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      schedules: {
+        Row: {
+          created_at: string | null
+          dates_to_exclude: string[] | null
+          description: string | null
+          end: string | null
+          id: string
+          name: string
+          recurring: boolean | null
+          start: string
+          time_zone_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          dates_to_exclude?: string[] | null
+          description?: string | null
+          end?: string | null
+          id?: string
+          name: string
+          recurring?: boolean | null
+          start: string
+          time_zone_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          dates_to_exclude?: string[] | null
+          description?: string | null
+          end?: string | null
+          id?: string
+          name?: string
+          recurring?: boolean | null
+          start?: string
+          time_zone_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      static_power_overrides: {
+        Row: {
+          chargers: string[] | null
+          created_at: string | null
+          id: string
+          schedule_id: string | null
+          updated_at: string | null
+          value: number
+        }
+        Insert: {
+          chargers?: string[] | null
+          created_at?: string | null
+          id?: string
+          schedule_id?: string | null
+          updated_at?: string | null
+          value: number
+        }
+        Update: {
+          chargers?: string[] | null
+          created_at?: string | null
+          id?: string
+          schedule_id?: string | null
+          updated_at?: string | null
+          value?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "static_power_overrides_schedule_id_fkey"
+            columns: ["schedule_id"]
+            isOneToOne: false
+            referencedRelation: "schedules"
             referencedColumns: ["id"]
           },
         ]
