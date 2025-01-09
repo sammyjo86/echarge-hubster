@@ -9,11 +9,11 @@ function App() {
   return (
     <Router>
       <SidebarProvider>
-        <div className="min-h-screen flex w-full">
+        <div className="min-h-screen flex w-full bg-background">
           <AppSidebar />
           <main className="flex-1">
             <div className="p-4">
-              <SidebarTrigger className="mb-4" />
+              <SidebarTrigger className="mb-4 bg-background hover:bg-accent" />
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/charger-config" element={<ChargerConfig />} />
