@@ -4,6 +4,8 @@ import { AppSidebar } from "@/components/layout/AppSidebar";
 import Index from "./pages/Index";
 import ChargerConfig from "./pages/ChargerConfig";
 import OcppMonitor from "./pages/OcppMonitor";
+import Schedules from "./pages/Schedules";
+import ScheduleForm from "./pages/ScheduleForm";
 
 function App() {
   return (
@@ -18,6 +20,8 @@ function App() {
                 <Route path="/" element={<Index />} />
                 <Route path="/charger-config" element={<ChargerConfig />} />
                 <Route path="/ocpp-monitor" element={<OcppMonitor />} />
+                <Route path="/schedules" element={<Schedules />} />
+                <Route path="/schedules/new" element={<ScheduleForm />} />
               </Routes>
             </div>
           </main>

@@ -48,6 +48,45 @@ export type Database = {
         }
         Relationships: []
       }
+      charging_schedules: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          end_date: string
+          end_time: string
+          garage: string
+          id: string
+          schedule_name: string
+          start_date: string
+          start_time: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          end_date: string
+          end_time: string
+          garage: string
+          id?: string
+          schedule_name: string
+          start_date: string
+          start_time: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          end_date?: string
+          end_time?: string
+          garage?: string
+          id?: string
+          schedule_name?: string
+          start_date?: string
+          start_time?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       charging_stations: {
         Row: {
           charge_point_id: string
