@@ -44,9 +44,17 @@ export function ScheduleFormComponent() {
     },
   });
 
-  async function onSubmit(data: ScheduleFormValues) {
+  async function onSubmit(values: ScheduleFormValues) {
     try {
-      const { error } = await supabase.from("charging_schedules").insert(data);
+      const { error } = await supabase.from("charging_schedules").insert({
+        garage: values.garage,
+        schedule_name: values.schedule_name,
+        description: values.description,
+        start_date: values.start_date,
+        end_date: values.end_date,
+        start_time: values.start_time,
+        end_time: values.end_time,
+      });
       
       if (error) throw error;
 
