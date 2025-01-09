@@ -46,7 +46,7 @@ export function ScheduleFormComponent() {
 
   async function onSubmit(data: ScheduleFormValues) {
     try {
-      const { error } = await supabase.from("charging_schedules").insert([data]);
+      const { error } = await supabase.from("charging_schedules").insert(data);
       
       if (error) throw error;
 
