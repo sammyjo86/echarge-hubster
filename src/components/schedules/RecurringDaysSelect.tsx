@@ -32,7 +32,7 @@ export function RecurringDaysSelect({ form }: RecurringDaysSelectProps) {
           <div className="mb-4">
             <FormLabel>Select Days</FormLabel>
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="flex flex-col space-y-2">
             {daysOfWeek.map((day) => (
               <FormField
                 key={day.id}
@@ -42,7 +42,7 @@ export function RecurringDaysSelect({ form }: RecurringDaysSelectProps) {
                   return (
                     <FormItem
                       key={day.id}
-                      className="flex flex-row items-start space-x-3 space-y-0"
+                      className="flex flex-row items-center space-x-3"
                     >
                       <FormControl>
                         <Checkbox
