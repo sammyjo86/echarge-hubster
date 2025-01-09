@@ -59,7 +59,7 @@ export function SchedulesDataTable() {
               <TableCell>{schedule.recurring ? "Yes" : "No"}</TableCell>
               <TableCell>{schedule.time_zone_id}</TableCell>
               <TableCell className="text-right">
-                <Link to={`/schedules/${schedule.id}/edit`}>
+                <Link to={`/schedules/new?id=${schedule.id}`}>
                   <Button variant="ghost" size="icon">
                     <Pencil className="h-4 w-4" />
                   </Button>

@@ -6,7 +6,7 @@ import { ScheduleConfigurationSection } from "./ScheduleConfigurationSection";
 import { useScheduleForm } from "@/hooks/useScheduleForm";
 
 export function ScheduleFormComponent() {
-  const { form, onSubmit } = useScheduleForm();
+  const { form, onSubmit, isEditing } = useScheduleForm();
 
   return (
     <Form {...form}>
@@ -14,7 +14,9 @@ export function ScheduleFormComponent() {
         <BasicScheduleInfo form={form} />
         <ScheduleTimingSection form={form} />
         <ScheduleConfigurationSection form={form} />
-        <Button type="submit">Create Schedule</Button>
+        <Button type="submit">
+          {isEditing ? "Update Schedule" : "Create Schedule"}
+        </Button>
       </form>
     </Form>
   );
