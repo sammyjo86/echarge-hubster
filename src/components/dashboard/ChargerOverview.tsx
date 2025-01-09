@@ -36,12 +36,11 @@ export const ChargerOverview = () => {
         },
         (payload: RealtimePostgresChangesPayload<ChargingStationPayload>) => {
           console.log('Charger status update:', payload);
-          // Update the charger status in the UI
           if (payload.new) {
             setChargers(current => 
               current.map(charger => 
                 charger.id === payload.new.id 
-                  ? { ...charger, status: payload.new.status.toLowerCase() }
+                  ? { ...charger, status: payload.new.status.toLowerCase() as Charger['status'] }
                   : charger
               )
             );
@@ -54,7 +53,7 @@ export const ChargerOverview = () => {
     const initializeChargers = () => {
       const initialChargers: Charger[] = Array.from({ length: 50 }, (_, i) => ({
         id: `charger-${i + 1}`,
-        name: `Charger ${i + 1}`,
+        name: `A${(i + 404).toString().padStart(3, '0')}`,
         status: Math.random() > 0.7 ? "charging" : "available",
         connectors: Array.from({ length: 2 }, (_, j) => ({
           id: j + 1,
@@ -73,37 +72,38 @@ export const ChargerOverview = () => {
 
   return (
     <Card className="h-full">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <BatteryCharging className="h-6 w-6" />
-          Charger Status Overview
+      <CardHeader className="py-3">
+        <CardTitle className="flex items-center gap-2 text-lg">
+          <BatteryCharging className="h-5 w-5" />
+          Charger Overview
         </CardTitle>
       </CardHeader>
-      <CardContent>
-        <ScrollArea className="h-[500px] pr-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <CardContent className="p-3">
+        <ScrollArea className="h-[600px] pr-2">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
             {chargers.map((charger) => (
-              <Card key={charger.id} className="card-hover">
-                <CardHeader className="pb-2">
-                  <div className="flex items-center justify-between">
-                    <h4 className="text-sm font-medium">{charger.name}</h4>
-                    <StatusBadge status={charger.status} />
+              <Card 
+                key={charger.id} 
+                className={`border ${
+                  charger.status === "charging" ? "bg-blue-500/10 border-blue-500/30" : ""
+                }`}
+              >
+                <CardContent className="p-2 space-y-1">
+                  <div className="text-sm font-medium text-center">
+                    {charger.name}
                   </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    {charger.connectors.map((connector) => (
-                      <div
-                        key={`${charger.id}-${connector.id}`}
-                        className="flex items-center justify-between"
-                      >
-                        <span className="text-sm text-muted-foreground">
-                          Connector {connector.id}
-                        </span>
-                        <StatusBadge status={connector.status} />
-                      </div>
-                    ))}
-                  </div>
+                  {charger.connectors.map((connector) => (
+                    <div
+                      key={`${charger.id}-${connector.id}`}
+                      className={`text-xs px-2 py-1 rounded ${
+                        connector.status === "charging" 
+                          ? "bg-blue-500/20 text-blue-700" 
+                          : "bg-gray-100"
+                      }`}
+                    >
+                      Connector {connector.id}
+                    </div>
+                  ))}
                 </CardContent>
               </Card>
             ))}
