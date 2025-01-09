@@ -15,7 +15,7 @@ export function SchedulesDataTable() {
     queryKey: ["schedules"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("charging_schedules")
+        .from("schedules")
         .select("*")
         .order("created_at", { ascending: false });
 
@@ -33,27 +33,27 @@ export function SchedulesDataTable() {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Garage</TableHead>
-            <TableHead>Schedule Name</TableHead>
+            <TableHead>Name</TableHead>
             <TableHead>Description</TableHead>
-            <TableHead>Start Date</TableHead>
-            <TableHead>End Date</TableHead>
-            <TableHead>Start Time</TableHead>
-            <TableHead>End Time</TableHead>
+            <TableHead>Start</TableHead>
+            <TableHead>End</TableHead>
+            <TableHead>Recurring</TableHead>
+            <TableHead>Time Zone</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {schedules?.map((schedule) => (
             <TableRow key={schedule.id}>
-              <TableCell>{schedule.garage}</TableCell>
-              <TableCell>{schedule.schedule_name}</TableCell>
+              <TableCell>{schedule.name}</TableCell>
               <TableCell>{schedule.description}</TableCell>
               <TableCell>
-                {format(new Date(schedule.start_date), "PP")}
+                {format(new Date(schedule.start), "PPp")}
               </TableCell>
-              <TableCell>{format(new Date(schedule.end_date), "PP")}</TableCell>
-              <TableCell>{schedule.start_time}</TableCell>
-              <TableCell>{schedule.end_time}</TableCell>
+              <TableCell>
+                {schedule.end ? format(new Date(schedule.end), "PPp") : "-"}
+              </TableCell>
+              <TableCell>{schedule.recurring ? "Yes" : "No"}</TableCell>
+              <TableCell>{schedule.time_zone_id}</TableCell>
             </TableRow>
           ))}
         </TableBody>
