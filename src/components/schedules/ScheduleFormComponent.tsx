@@ -1,40 +1,33 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { useNavigate } from "react-router-dom";
-import { z } from "zod";
-import { Button } from "@/components/ui/button";
+import * as z from "zod";
 import { Form } from "@/components/ui/form";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
 import { BasicScheduleInfo } from "./BasicScheduleInfo";
-import { ScheduleConfigurationSection } from "./ScheduleConfigurationSection";
 import { ScheduleTimingSection } from "./ScheduleTimingSection";
+import { ScheduleConfigurationSection } from "./ScheduleConfigurationSection";
+import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "@/components/ui/use-toast";
 
 const scheduleFormSchema = z.object({
-  name: z.string().min(1, "Schedule name is required"),
+  name: z.string().min(1, "Name is required"),
   description: z.string().optional(),
-  start: z.string().min(1, "Start date and time is required"),
-  end: z.string().min(1, "End date and time is required"),
+  start: z.date(),
+  end: z.date(),
   time_zone_id: z.string().default("stockholm"),
-  schedule_type: z.enum([
-    "static_power",
-    "capacity_limit",
-    "parking_prohibited",
-    "energy_price",
-  ]).default("static_power"),
-  useDays: z.boolean().default(false),
-  useMonths: z.boolean().default(false),
-  useHours: z.boolean().default(false),
+  schedule_type: z.enum(["static_power", "capacity_limit", "energy_price", "parking_prohibited"]),
+  hasRecurringSettings: z.boolean().default(false),
   recurringDays: z.array(z.string()).optional(),
   recurringMonths: z.array(z.string()).optional(),
-  recurringStartTime: z.string().optional(),
-  recurringEndTime: z.string().optional(),
-  staticPowerValue: z.number().optional(),
-  selectedChargers: z.string().optional(),
+  startTime: z.string().optional(),
+  endTime: z.string().optional(),
+  value: z.number().optional(),
+  chargers: z.array(z.string()).optional(),
   capacityLimit: z.number().optional(),
   energyPrice: z.number().optional(),
   gridConnectionTransformer: z.string().optional(),
-  parkingProhibitedChargers: z.string().optional(),
+  parkingProhibitedChargers: z.array(z.string()).optional(),
 });
 
 export type ScheduleFormValues = z.infer<typeof scheduleFormSchema>;
@@ -42,50 +35,47 @@ export type ScheduleFormValues = z.infer<typeof scheduleFormSchema>;
 export function ScheduleFormComponent() {
   const { toast } = useToast();
   const navigate = useNavigate();
+
   const form = useForm<ScheduleFormValues>({
     resolver: zodResolver(scheduleFormSchema),
     defaultValues: {
       name: "",
       description: "",
-      start: "",
-      end: "",
+      start: new Date(),
+      end: new Date(),
       time_zone_id: "stockholm",
       schedule_type: "static_power",
-      useDays: false,
-      useMonths: false,
-      useHours: false,
+      hasRecurringSettings: false,
       recurringDays: [],
       recurringMonths: [],
-      recurringStartTime: "",
-      recurringEndTime: "",
-      staticPowerValue: undefined,
-      selectedChargers: undefined,
+      startTime: undefined,
+      endTime: undefined,
+      value: undefined,
+      chargers: [],
       capacityLimit: undefined,
       energyPrice: undefined,
       gridConnectionTransformer: "",
-      parkingProhibitedChargers: undefined,
+      parkingProhibitedChargers: [],
     },
   });
 
-  const hasRecurringSettings =
-    form.watch("useDays") ||
-    form.watch("useMonths") ||
-    form.watch("useHours");
+  const hasRecurringSettings = form.watch("hasRecurringSettings");
 
   async function onSubmit(values: ScheduleFormValues) {
     try {
-      const { data: scheduleData, error: scheduleError } = await supabase
+      // Insert schedule
+      const { data: schedule, error: scheduleError } = await supabase
         .from("schedules")
         .insert({
           name: values.name,
           description: values.description,
-          start: new Date(values.start).toISOString(),
-          end: new Date(values.end).toISOString(),
+          start: values.start.toISOString(),
+          end: values.end.toISOString(),
           recurring: hasRecurringSettings,
           time_zone_id: values.time_zone_id,
           schedule_type: values.schedule_type,
-          parking_prohibited_chargers: values.schedule_type === "parking_prohibited" && values.parkingProhibitedChargers
-            ? [values.parkingProhibitedChargers]
+          parking_prohibited_chargers: values.schedule_type === "parking_prohibited" 
+            ? values.parkingProhibitedChargers 
             : null,
         })
         .select()
@@ -93,82 +83,77 @@ export function ScheduleFormComponent() {
 
       if (scheduleError) throw scheduleError;
 
-      if (hasRecurringSettings && scheduleData) {
-        const { error: recurrenceError } = await supabase
-          .from("recurrence_patterns")
+      if (hasRecurringSettings) {
+        const { error: recurringError } = await supabase
+          .from("recurring_patterns")
           .insert({
-            schedule_id: scheduleData.id,
-            start_time: values.recurringStartTime,
-            end_time: values.recurringEndTime,
-            recurring_days: values.recurringDays,
+            schedule_id: schedule.id,
+            days: values.recurringDays,
+            months: values.recurringMonths,
+            start_time: values.startTime,
+            end_time: values.endTime,
           });
 
-        if (recurrenceError) throw recurrenceError;
+        if (recurringError) throw recurringError;
       }
 
-      if (scheduleData) {
-        switch (values.schedule_type) {
-          case "static_power":
-            if (values.staticPowerValue) {
-              const { error } = await supabase
-                .from("static_power_overrides")
-                .insert({
-                  schedule_id: scheduleData.id,
-                  value: values.staticPowerValue,
-                  chargers: values.selectedChargers ? [values.selectedChargers] : [],
-                });
-              if (error) throw error;
-            }
-            break;
-          case "capacity_limit":
-            if (values.capacityLimit && values.gridConnectionTransformer) {
-              const { error } = await supabase
-                .from("capacity_limit_overrides")
-                .insert({
-                  schedule_id: scheduleData.id,
-                  capacity_limit: values.capacityLimit,
-                  grid_connection_transformer: values.gridConnectionTransformer,
-                });
-              if (error) throw error;
-            }
-            break;
-          case "energy_price":
-            if (values.energyPrice && values.gridConnectionTransformer) {
-              const { error } = await supabase
-                .from("energy_price_overrides")
-                .insert({
-                  schedule_id: scheduleData.id,
-                  price: values.energyPrice,
-                  grid_connection_transformer: values.gridConnectionTransformer,
-                });
-              if (error) throw error;
-            }
-            break;
-        }
+      if (values.schedule_type === "static_power") {
+        const { error: configError } = await supabase
+          .from("static_power_configs")
+          .insert({
+            schedule_id: schedule.id,
+            value: values.value,
+            chargers: values.chargers,
+          });
+
+        if (configError) throw configError;
+      }
+
+      if (values.schedule_type === "capacity_limit") {
+        const { error: configError } = await supabase
+          .from("capacity_limit_configs")
+          .insert({
+            schedule_id: schedule.id,
+            capacity_limit: values.capacityLimit,
+            grid_connection_transformer: values.gridConnectionTransformer,
+          });
+
+        if (configError) throw configError;
+      }
+
+      if (values.schedule_type === "energy_price") {
+        const { error: configError } = await supabase
+          .from("energy_price_configs")
+          .insert({
+            schedule_id: schedule.id,
+            energy_price: values.energyPrice,
+          });
+
+        if (configError) throw configError;
       }
 
       toast({
-        title: "Schedule created",
-        description: "Your schedule has been created successfully.",
+        title: "Schedule created successfully",
+        description: "Your new schedule has been created.",
       });
 
       navigate("/schedules");
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "There was an error creating the schedule.",
-        variant: "destructive",
-      });
       console.error("Error creating schedule:", error);
+      toast({
+        variant: "destructive",
+        title: "Error creating schedule",
+        description: "There was an error creating your schedule. Please try again.",
+      });
     }
   }
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
         <BasicScheduleInfo form={form} />
-        <ScheduleConfigurationSection form={form} />
         <ScheduleTimingSection form={form} />
+        <ScheduleConfigurationSection form={form} />
         <Button type="submit">Create Schedule</Button>
       </form>
     </Form>

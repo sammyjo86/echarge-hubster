@@ -49,8 +49,16 @@ export function ParkingProhibitedConfig({
           <FormItem>
             <FormLabel>Select Chargers</FormLabel>
             <Select
-              onValueChange={field.onChange}
-              defaultValue={field.value}
+              onValueChange={(value) => {
+                const currentValues = Array.isArray(field.value) ? field.value : [];
+                if (currentValues.includes(value)) {
+                  field.onChange(currentValues.filter(v => v !== value));
+                } else {
+                  field.onChange([...currentValues, value]);
+                }
+              }}
+              value={field.value?.[0] || ""}
+              multiple
             >
               <FormControl>
                 <SelectTrigger>
