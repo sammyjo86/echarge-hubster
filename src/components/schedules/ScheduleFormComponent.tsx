@@ -12,6 +12,9 @@ import { RecurringTimeSelect } from "./RecurringTimeSelect";
 import { RecurringSection } from "./RecurringSection";
 import { BasicScheduleInfo } from "./BasicScheduleInfo";
 import { ScheduleDateTimeFields } from "./ScheduleDateTimeFields";
+import { StaticPowerConfig } from "./schedule-configs/StaticPowerConfig";
+import { CapacityLimitConfig } from "./schedule-configs/CapacityLimitConfig";
+import { EnergyPriceConfig } from "./schedule-configs/EnergyPriceConfig";
 
 const scheduleFormSchema = z.object({
   name: z.string().min(1, "Schedule name is required"),
@@ -32,6 +35,11 @@ const scheduleFormSchema = z.object({
   recurringMonths: z.array(z.string()).optional(),
   recurringStartTime: z.string().optional(),
   recurringEndTime: z.string().optional(),
+  // New fields for schedule type configurations
+  staticPowerValue: z.number().optional(),
+  capacityLimit: z.number().optional(),
+  energyPrice: z.number().optional(),
+  gridConnectionTransformer: z.string().optional(),
 });
 
 export type ScheduleFormValues = z.infer<typeof scheduleFormSchema>;
@@ -55,9 +63,14 @@ export function ScheduleFormComponent() {
       recurringMonths: [],
       recurringStartTime: "",
       recurringEndTime: "",
+      staticPowerValue: undefined,
+      capacityLimit: undefined,
+      energyPrice: undefined,
+      gridConnectionTransformer: "",
     },
   });
 
+  const scheduleType = form.watch("schedule_type");
   const hasRecurringSettings =
     form.watch("useDays") ||
     form.watch("useMonths") ||
@@ -92,6 +105,47 @@ export function ScheduleFormComponent() {
           });
 
         if (recurrenceError) throw recurrenceError;
+      }
+
+      // Insert schedule type specific configurations
+      if (scheduleData) {
+        switch (values.schedule_type) {
+          case "static_power":
+            if (values.staticPowerValue) {
+              const { error } = await supabase
+                .from("static_power_overrides")
+                .insert({
+                  schedule_id: scheduleData.id,
+                  value: values.staticPowerValue,
+                });
+              if (error) throw error;
+            }
+            break;
+          case "capacity_limit":
+            if (values.capacityLimit && values.gridConnectionTransformer) {
+              const { error } = await supabase
+                .from("capacity_limit_overrides")
+                .insert({
+                  schedule_id: scheduleData.id,
+                  capacity_limit: values.capacityLimit,
+                  grid_connection_transformer: values.gridConnectionTransformer,
+                });
+              if (error) throw error;
+            }
+            break;
+          case "energy_price":
+            if (values.energyPrice && values.gridConnectionTransformer) {
+              const { error } = await supabase
+                .from("energy_price_overrides")
+                .insert({
+                  schedule_id: scheduleData.id,
+                  price: values.energyPrice,
+                  grid_connection_transformer: values.gridConnectionTransformer,
+                });
+              if (error) throw error;
+            }
+            break;
+        }
       }
 
       toast({
@@ -143,6 +197,15 @@ export function ScheduleFormComponent() {
           >
             <RecurringTimeSelect form={form} />
           </RecurringSection>
+        </div>
+
+        <div className="space-y-4 rounded-lg border p-4">
+          <h3 className="text-lg font-medium">Schedule Configuration</h3>
+          {scheduleType === "static_power" && <StaticPowerConfig form={form} />}
+          {scheduleType === "capacity_limit" && (
+            <CapacityLimitConfig form={form} />
+          )}
+          {scheduleType === "energy_price" && <EnergyPriceConfig form={form} />}
         </div>
 
         <Button type="submit">Create Schedule</Button>
