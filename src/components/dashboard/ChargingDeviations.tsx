@@ -48,57 +48,46 @@ export const ChargingDeviations = () => {
   }, []);
 
   const fetchDeviations = async () => {
-    const { data, error } = await supabase
-      .from('charging_transactions')
-      .select(`
-        *,
-        charging_stations!inner (
-          charge_point_id,
-          location
-        )
-      `)
-      .eq('status', 'In Progress')
-      .order('start_time', { ascending: false });
+    // For now, let's use mock data instead of the actual fetch
+    const mockDeviations: ChargingDeviation[] = [
+      {
+        busId: "Bus 123",
+        soc: 45,
+        departureTime: "08:30",
+        parkingSpot: "L0001-A404",
+        deviationTime: "2h 15min",
+      },
+      {
+        busId: "Bus 456",
+        soc: 23,
+        departureTime: "09:15",
+        parkingSpot: "L0002-A405",
+        deviationTime: "1h 45min",
+      },
+      {
+        busId: "Bus 789",
+        soc: 67,
+        departureTime: "10:00",
+        parkingSpot: "L0003-A406",
+        deviationTime: "30min",
+      },
+      {
+        busId: "Bus 234",
+        soc: 15,
+        departureTime: "11:30",
+        parkingSpot: "L0004-A407",
+        deviationTime: "3h 20min",
+      },
+      {
+        busId: "Bus 567",
+        soc: 89,
+        departureTime: "12:45",
+        parkingSpot: "L0005-A408",
+        deviationTime: "45min",
+      }
+    ];
 
-    if (error) {
-      console.error('Error fetching deviations:', error);
-      return;
-    }
-
-    // Transform the data into the expected format
-    const transformedData: ChargingDeviation[] = data.map((transaction) => ({
-      busId: transaction.charging_stations?.charge_point_id || 'Unknown',
-      soc: calculateSOC(transaction.meter_start, transaction.meter_stop),
-      departureTime: formatTime(transaction.start_time),
-      parkingSpot: transaction.charging_stations?.location || 'Unknown',
-      deviationTime: calculateDeviationTime(transaction.start_time),
-    }));
-
-    setDeviations(transformedData);
-  };
-
-  const calculateSOC = (meterStart?: number, meterStop?: number): number => {
-    if (!meterStart || !meterStop) return 0;
-    // Simple calculation - can be made more sophisticated based on actual battery capacity
-    return Math.min(Math.round(((meterStop - meterStart) / 1000) * 100), 100);
-  };
-
-  const formatTime = (timestamp: string): string => {
-    return new Date(timestamp).toLocaleTimeString([], { 
-      hour: '2-digit', 
-      minute: '2-digit' 
-    });
-  };
-
-  const calculateDeviationTime = (startTime: string): string => {
-    const start = new Date(startTime);
-    const now = new Date();
-    const diffMinutes = Math.round((now.getTime() - start.getTime()) / (1000 * 60));
-    
-    if (diffMinutes < 60) {
-      return `${diffMinutes}min`;
-    }
-    return `${Math.floor(diffMinutes / 60)}h ${diffMinutes % 60}min`;
+    setDeviations(mockDeviations);
   };
 
   return (
