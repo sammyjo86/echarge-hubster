@@ -9,7 +9,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { LayoutDashboard, Settings, Activity } from "lucide-react";
+import { LayoutDashboard, Settings, Activity, Calendar } from "lucide-react";
 
 const menuItems = [
   {
@@ -26,6 +26,11 @@ const menuItems = [
     title: "OCPP Monitor",
     icon: Activity,
     path: "/ocpp-monitor",
+  },
+  {
+    title: "Schedules",
+    icon: Calendar,
+    path: "/schedules",
   },
 ];
 
