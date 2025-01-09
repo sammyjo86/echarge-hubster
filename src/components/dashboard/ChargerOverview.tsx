@@ -11,6 +11,7 @@ interface Charger {
   status: "charging" | "available" | "offline" | "error";
   connectors: {
     id: number;
+    name: string;
     status: "charging" | "available" | "offline" | "error";
   }[];
 }
@@ -52,10 +53,11 @@ export const ChargerOverview = () => {
     const initializeChargers = () => {
       const initialChargers: Charger[] = Array.from({ length: 50 }, (_, i) => ({
         id: `charger-${i + 1}`,
-        name: `A${(i + 404).toString().padStart(3, '0')}`,
+        name: `Station ${i + 1}`,
         status: Math.random() > 0.7 ? "charging" : "available",
         connectors: Array.from({ length: 2 }, (_, j) => ({
           id: j + 1,
+          name: `A${(i * 2 + j + 404).toString().padStart(3, '0')}`,
           status: Math.random() > 0.7 ? "charging" : "available",
         })),
       }));
@@ -100,7 +102,7 @@ export const ChargerOverview = () => {
                           : "bg-gray-100"
                       }`}
                     >
-                      C{connector.id}
+                      {connector.name}
                     </div>
                   ))}
                 </CardContent>
