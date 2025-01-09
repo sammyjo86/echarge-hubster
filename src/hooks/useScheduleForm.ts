@@ -58,6 +58,9 @@ export function useScheduleForm() {
       if (error) throw error;
 
       if (schedule) {
+        // Ensure schedule_type is one of the valid types
+        const schedule_type = schedule.schedule_type as ScheduleFormValues['schedule_type'];
+        
         // Set form values based on schedule data
         form.reset({
           name: schedule.name,
@@ -65,9 +68,9 @@ export function useScheduleForm() {
           start: new Date(schedule.start),
           end: schedule.end ? new Date(schedule.end) : new Date(),
           time_zone_id: schedule.time_zone_id,
-          schedule_type: schedule.schedule_type,
+          schedule_type,
           useDays: schedule.recurrence_patterns?.[0]?.recurring_days?.length > 0 || false,
-          useMonths: false, // Add logic if needed
+          useMonths: false,
           useHours: schedule.recurrence_patterns?.[0]?.start_time !== null || false,
           recurringDays: schedule.recurrence_patterns?.[0]?.recurring_days || [],
           recurringMonths: [],
