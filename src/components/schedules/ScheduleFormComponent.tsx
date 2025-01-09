@@ -63,7 +63,7 @@ export function ScheduleFormComponent() {
     },
   });
 
-  const hasRecurringSettings = form.watch("hasRecurringSettings");
+  const hasRecurringSettings = form.watch(["useDays", "useMonths", "useHours"]).some(Boolean);
 
   async function onSubmit(values: ScheduleFormValues) {
     try {
@@ -89,7 +89,7 @@ export function ScheduleFormComponent() {
 
       if (hasRecurringSettings) {
         const { error: recurringError } = await supabase
-          .from("recurring_patterns")
+          .from("recurrence_patterns")
           .insert({
             schedule_id: schedule.id,
             days: values.recurringDays,
@@ -103,7 +103,7 @@ export function ScheduleFormComponent() {
 
       if (values.schedule_type === "static_power") {
         const { error: configError } = await supabase
-          .from("static_power_configs")
+          .from("static_power_overrides")
           .insert({
             schedule_id: schedule.id,
             value: values.staticPowerValue,
@@ -115,7 +115,7 @@ export function ScheduleFormComponent() {
 
       if (values.schedule_type === "capacity_limit") {
         const { error: configError } = await supabase
-          .from("capacity_limit_configs")
+          .from("capacity_limit_overrides")
           .insert({
             schedule_id: schedule.id,
             capacity_limit: values.capacityLimit,
@@ -127,10 +127,11 @@ export function ScheduleFormComponent() {
 
       if (values.schedule_type === "energy_price") {
         const { error: configError } = await supabase
-          .from("energy_price_configs")
+          .from("energy_price_overrides")
           .insert({
             schedule_id: schedule.id,
-            energy_price: values.energyPrice,
+            price: values.energyPrice,
+            grid_connection_transformer: values.gridConnectionTransformer,
           });
 
         if (configError) throw configError;
