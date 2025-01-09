@@ -1,7 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { StatusBadge } from "./StatusBadge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { BatteryCharging } from "lucide-react";
 import { RealtimePostgresChangesPayload } from "@supabase/supabase-js";
@@ -39,8 +38,8 @@ export const ChargerOverview = () => {
           if (payload.new) {
             setChargers(current => 
               current.map(charger => 
-                charger.id === payload.new.id 
-                  ? { ...charger, status: payload.new.status.toLowerCase() as Charger['status'] }
+                charger.id === (payload.new as ChargingStationPayload).id 
+                  ? { ...charger, status: (payload.new as ChargingStationPayload).status.toLowerCase() as Charger['status'] }
                   : charger
               )
             );
@@ -72,15 +71,15 @@ export const ChargerOverview = () => {
 
   return (
     <Card className="h-full">
-      <CardHeader className="py-3">
-        <CardTitle className="flex items-center gap-2 text-lg">
-          <BatteryCharging className="h-5 w-5" />
+      <CardHeader className="py-2">
+        <CardTitle className="flex items-center gap-1 text-base">
+          <BatteryCharging className="h-4 w-4" />
           Charger Overview
         </CardTitle>
       </CardHeader>
-      <CardContent className="p-3">
-        <ScrollArea className="h-[600px] pr-2">
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
+      <CardContent className="p-2">
+        <ScrollArea className="h-[600px]">
+          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-1">
             {chargers.map((charger) => (
               <Card 
                 key={charger.id} 
@@ -88,20 +87,20 @@ export const ChargerOverview = () => {
                   charger.status === "charging" ? "bg-blue-500/10 border-blue-500/30" : ""
                 }`}
               >
-                <CardContent className="p-2 space-y-1">
-                  <div className="text-sm font-medium text-center">
+                <CardContent className="p-1 space-y-0.5">
+                  <div className="text-xs font-medium text-center">
                     {charger.name}
                   </div>
                   {charger.connectors.map((connector) => (
                     <div
                       key={`${charger.id}-${connector.id}`}
-                      className={`text-xs px-2 py-1 rounded ${
+                      className={`text-[10px] px-1 py-0.5 rounded ${
                         connector.status === "charging" 
                           ? "bg-blue-500/20 text-blue-700" 
                           : "bg-gray-100"
                       }`}
                     >
-                      Connector {connector.id}
+                      C{connector.id}
                     </div>
                   ))}
                 </CardContent>
