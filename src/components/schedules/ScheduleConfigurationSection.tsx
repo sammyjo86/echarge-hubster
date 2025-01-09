@@ -3,6 +3,7 @@ import { ScheduleFormValues } from "./ScheduleFormComponent";
 import { StaticPowerConfig } from "./schedule-configs/StaticPowerConfig";
 import { CapacityLimitConfig } from "./schedule-configs/CapacityLimitConfig";
 import { EnergyPriceConfig } from "./schedule-configs/EnergyPriceConfig";
+import { ParkingProhibitedConfig } from "./schedule-configs/ParkingProhibitedConfig";
 import { ScheduleTypeSelect } from "./ScheduleTypeSelect";
 
 export function ScheduleConfigurationSection({
@@ -19,6 +20,7 @@ export function ScheduleConfigurationSection({
       {scheduleType === "static_power" && <StaticPowerConfig form={form} />}
       {scheduleType === "capacity_limit" && <CapacityLimitConfig form={form} />}
       {scheduleType === "energy_price" && <EnergyPriceConfig form={form} />}
+      {scheduleType === "parking_prohibited" && <ParkingProhibitedConfig form={form} />}
     </div>
   );
 }

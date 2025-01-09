@@ -34,6 +34,7 @@ const scheduleFormSchema = z.object({
   capacityLimit: z.number().optional(),
   energyPrice: z.number().optional(),
   gridConnectionTransformer: z.string().optional(),
+  parkingProhibitedChargers: z.string().optional(),
 });
 
 export type ScheduleFormValues = z.infer<typeof scheduleFormSchema>;
@@ -62,6 +63,7 @@ export function ScheduleFormComponent() {
       capacityLimit: undefined,
       energyPrice: undefined,
       gridConnectionTransformer: "",
+      parkingProhibitedChargers: undefined,
     },
   });
 
@@ -82,6 +84,9 @@ export function ScheduleFormComponent() {
           recurring: hasRecurringSettings,
           time_zone_id: values.time_zone_id,
           schedule_type: values.schedule_type,
+          parking_prohibited_chargers: values.schedule_type === "parking_prohibited" && values.parkingProhibitedChargers
+            ? [values.parkingProhibitedChargers]
+            : null,
         })
         .select()
         .single();

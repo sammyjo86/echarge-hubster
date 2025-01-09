@@ -256,6 +256,7 @@ export type Database = {
           end: string | null
           id: string
           name: string
+          parking_prohibited_chargers: string[] | null
           recurring: boolean | null
           schedule_type: string | null
           start: string
@@ -269,6 +270,7 @@ export type Database = {
           end?: string | null
           id?: string
           name: string
+          parking_prohibited_chargers?: string[] | null
           recurring?: boolean | null
           schedule_type?: string | null
           start: string
@@ -282,6 +284,7 @@ export type Database = {
           end?: string | null
           id?: string
           name?: string
+          parking_prohibited_chargers?: string[] | null
           recurring?: boolean | null
           schedule_type?: string | null
           start?: string
