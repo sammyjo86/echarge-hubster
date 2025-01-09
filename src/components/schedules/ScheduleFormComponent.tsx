@@ -13,7 +13,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { RecurringDaysSelect } from "./RecurringDaysSelect";
@@ -26,7 +25,6 @@ const scheduleFormSchema = z.object({
   description: z.string().optional(),
   start: z.string().min(1, "Start date and time is required"),
   end: z.string().min(1, "End date and time is required"),
-  recurring: z.boolean().default(false),
   time_zone_id: z.string().default("stockholm"),
   useDays: z.boolean().default(false),
   useMonths: z.boolean().default(false),
@@ -49,7 +47,6 @@ export function ScheduleFormComponent() {
       description: "",
       start: "",
       end: "",
-      recurring: false,
       time_zone_id: "stockholm",
       useDays: false,
       useMonths: false,
@@ -61,7 +58,7 @@ export function ScheduleFormComponent() {
     },
   });
 
-  const isRecurring = form.watch("recurring");
+  const hasRecurringSettings = form.watch("useDays") || form.watch("useMonths") || form.watch("useHours");
 
   async function onSubmit(values: ScheduleFormValues) {
     try {
@@ -73,7 +70,7 @@ export function ScheduleFormComponent() {
           description: values.description,
           start: new Date(values.start).toISOString(),
           end: new Date(values.end).toISOString(),
-          recurring: values.recurring,
+          recurring: hasRecurringSettings,
           time_zone_id: values.time_zone_id,
         })
         .select()
@@ -81,8 +78,8 @@ export function ScheduleFormComponent() {
 
       if (scheduleError) throw scheduleError;
 
-      // If it's a recurring schedule, create the recurrence pattern
-      if (values.recurring && scheduleData) {
+      // If it has recurring settings, create the recurrence pattern
+      if (hasRecurringSettings && scheduleData) {
         const { error: recurrenceError } = await supabase
           .from("recurrence_patterns")
           .insert({
@@ -175,57 +172,34 @@ export function ScheduleFormComponent() {
           />
         </div>
 
-        <FormField
-          control={form.control}
-          name="recurring"
-          render={({ field }) => (
-            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-              <div className="space-y-0.5">
-                <FormLabel className="text-base">Recurring Schedule</FormLabel>
-                <div className="text-sm text-muted-foreground">
-                  Enable if this is a recurring schedule
-                </div>
-              </div>
-              <FormControl>
-                <Switch
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                />
-              </FormControl>
-            </FormItem>
-          )}
-        />
+        <div className="space-y-4">
+          <RecurringSection
+            form={form}
+            title="Recurring Days"
+            description="Configure which days this schedule should repeat on"
+            fieldName="useDays"
+          >
+            <RecurringDaysSelect form={form} />
+          </RecurringSection>
 
-        {isRecurring && (
-          <div className="space-y-4">
-            <RecurringSection
-              form={form}
-              title="Days"
-              description="Configure which days this schedule should repeat on"
-              fieldName="useDays"
-            >
-              <RecurringDaysSelect form={form} />
-            </RecurringSection>
+          <RecurringSection
+            form={form}
+            title="Recurring Months"
+            description="Configure which months this schedule should be active in"
+            fieldName="useMonths"
+          >
+            <RecurringMonthsSelect form={form} />
+          </RecurringSection>
 
-            <RecurringSection
-              form={form}
-              title="Months"
-              description="Configure which months this schedule should be active in"
-              fieldName="useMonths"
-            >
-              <RecurringMonthsSelect form={form} />
-            </RecurringSection>
-
-            <RecurringSection
-              form={form}
-              title="Hours"
-              description="Configure the daily time window for this schedule"
-              fieldName="useHours"
-            >
-              <RecurringTimeSelect form={form} />
-            </RecurringSection>
-          </div>
-        )}
+          <RecurringSection
+            form={form}
+            title="Recurring Hours"
+            description="Configure the daily time window for this schedule"
+            fieldName="useHours"
+          >
+            <RecurringTimeSelect form={form} />
+          </RecurringSection>
+        </div>
 
         <Button type="submit">Create Schedule</Button>
       </form>
