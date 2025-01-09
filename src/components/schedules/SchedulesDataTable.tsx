@@ -9,6 +9,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { format } from "date-fns";
+import { Button } from "@/components/ui/button";
+import { Pencil } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export function SchedulesDataTable() {
   const { data: schedules, isLoading } = useQuery({
@@ -39,6 +42,7 @@ export function SchedulesDataTable() {
             <TableHead>End</TableHead>
             <TableHead>Recurring</TableHead>
             <TableHead>Time Zone</TableHead>
+            <TableHead className="text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -54,6 +58,13 @@ export function SchedulesDataTable() {
               </TableCell>
               <TableCell>{schedule.recurring ? "Yes" : "No"}</TableCell>
               <TableCell>{schedule.time_zone_id}</TableCell>
+              <TableCell className="text-right">
+                <Link to={`/schedules/${schedule.id}/edit`}>
+                  <Button variant="ghost" size="icon">
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                </Link>
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>
