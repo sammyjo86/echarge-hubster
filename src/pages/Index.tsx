@@ -1,5 +1,4 @@
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import { FleetOverview } from "@/components/dashboard/FleetOverview";
 import { DepotMap } from "@/components/dashboard/DepotMap";
 import { PowerMeter } from "@/components/dashboard/PowerMeter";
 import { ChargingDeviations } from "@/components/dashboard/ChargingDeviations";
@@ -16,7 +15,7 @@ const Index = () => {
         direction="vertical"
         className="min-h-[800px] rounded-lg border"
       >
-        <ResizablePanel defaultSize={50}>
+        <ResizablePanel defaultSize={60}>
           <ResizablePanelGroup direction="horizontal">
             <ResizablePanel defaultSize={50}>
               <div className="p-4">
@@ -32,15 +31,9 @@ const Index = () => {
           </ResizablePanelGroup>
         </ResizablePanel>
         <ResizableHandle withHandle />
-        <ResizablePanel defaultSize={25}>
+        <ResizablePanel defaultSize={40}>
           <div className="p-4">
             <ChargingDeviations />
-          </div>
-        </ResizablePanel>
-        <ResizableHandle withHandle />
-        <ResizablePanel defaultSize={25}>
-          <div className="p-4">
-            <FleetOverview />
           </div>
         </ResizablePanel>
       </ResizablePanelGroup>
