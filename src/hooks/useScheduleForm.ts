@@ -26,8 +26,8 @@ export function useScheduleForm() {
       useHours: false,
       recurringDays: [],
       recurringMonths: [],
-      recurringStartTime: undefined,
-      recurringEndTime: undefined,
+      recurringStartTime: "00:00",
+      recurringEndTime: "23:59",
       staticPowerValue: undefined,
       selectedChargers: [],
       capacityLimit: undefined,
@@ -58,10 +58,8 @@ export function useScheduleForm() {
       if (error) throw error;
 
       if (schedule) {
-        // Ensure schedule_type is one of the valid types
         const schedule_type = schedule.schedule_type as ScheduleFormValues['schedule_type'];
         
-        // Set form values based on schedule data
         form.reset({
           name: schedule.name,
           description: schedule.description || "",
@@ -74,8 +72,8 @@ export function useScheduleForm() {
           useHours: schedule.recurrence_patterns?.[0]?.start_time !== null || false,
           recurringDays: schedule.recurrence_patterns?.[0]?.recurring_days || [],
           recurringMonths: [],
-          recurringStartTime: schedule.recurrence_patterns?.[0]?.start_time || undefined,
-          recurringEndTime: schedule.recurrence_patterns?.[0]?.end_time || undefined,
+          recurringStartTime: schedule.recurrence_patterns?.[0]?.start_time || "00:00",
+          recurringEndTime: schedule.recurrence_patterns?.[0]?.end_time || "23:59",
           staticPowerValue: schedule.static_power_overrides?.[0]?.value,
           selectedChargers: schedule.static_power_overrides?.[0]?.chargers || [],
           capacityLimit: schedule.capacity_limit_overrides?.[0]?.capacity_limit,
@@ -91,8 +89,6 @@ export function useScheduleForm() {
     enabled: !!scheduleId,
   });
 
-  const hasRecurringSettings = form.watch(["useDays", "useMonths", "useHours"]).some(Boolean);
-
   async function onSubmit(values: ScheduleFormValues) {
     try {
       let scheduleData = {
@@ -100,7 +96,7 @@ export function useScheduleForm() {
         description: values.description,
         start: values.start.toISOString(),
         end: values.end.toISOString(),
-        recurring: hasRecurringSettings,
+        recurring: values.useDays || values.useMonths || values.useHours,
         time_zone_id: values.time_zone_id,
         schedule_type: values.schedule_type,
         parking_prohibited_chargers: values.schedule_type === "parking_prohibited" 
@@ -124,12 +120,12 @@ export function useScheduleForm() {
 
       if (scheduleError) throw scheduleError;
 
-      if (hasRecurringSettings) {
+      if (values.useDays || values.useHours) {
         const recurrenceData = {
           schedule_id: schedule.id,
-          recurring_days: values.recurringDays,
-          start_time: values.recurringStartTime,
-          end_time: values.recurringEndTime,
+          recurring_days: values.useDays ? values.recurringDays : null,
+          start_time: values.useHours ? values.recurringStartTime : "00:00",
+          end_time: values.useHours ? values.recurringEndTime : "23:59",
         };
 
         if (scheduleId) {
@@ -226,7 +222,6 @@ export function useScheduleForm() {
   return {
     form,
     onSubmit,
-    hasRecurringSettings,
     isEditing: !!scheduleId,
   };
 }
